@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Games - Scorekeeper</title>
+  </head>
+  <body>
+    <main class="container mx-auto p-6">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Games</h1>
+        <p class="text-gray-600">Select a game to view scores and details</p>
+      </header>
+      
+      <div class="grid gap-4" data-controller="game-list">
+        <!-- Game items will be populated here -->
+        <x-game-item 
+          data-game-id="1" 
+          data-game-name="Chess" 
+          data-players="2"
+          data-status="active">
+        </x-game-item>
+        
+        <x-game-item 
+          data-game-id="2" 
+          data-game-name="Poker" 
+          data-players="4"
+          data-status="completed">
+        </x-game-item>
+        
+        <x-game-item 
+          data-game-id="3" 
+          data-game-name="Scrabble" 
+          data-players="3"
+          data-status="active">
+        </x-game-item>
+      </div>
+    </main>
+    
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

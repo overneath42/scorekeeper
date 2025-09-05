@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Detail - Scorekeeper</title>
+  </head>
+  <body class="h-screen overflow-hidden">
+    <main class="h-full flex flex-col container mx-auto relative">
+      <header class="grid grid-cols-2 grid-rows-2 border-b-2 p-2 flex-shrink-0">
+        <a href="games.html" class="col-start-1 row-start-1 self-baseline">
+          ← Back to Games</a
+        >
+        <button
+          type="button"
+          class="col-start-2 row-start-1 self-baseline justify-self-end"
+        >
+          Edit
+        </button>
+        <h1 class="row-start-2 col-span-2 text-center text-3xl">Game Title</h1>
+      </header>
+      <div class="flex-1 overflow-auto">
+        <div class="grid grid-cols-2 grid-rows-[min-content_1fr] h-full">
+          <p
+            class="col-start-1 col-span-1 sticky top-0 py-2 border-b border-r text-center uppercase"
+          >
+            Player 1
+          </p>
+          <x-score-list
+            class="col-start-1 row-start-2 col-span-1 pt-2 border-r"
+            id="player1-scores"
+          ></x-score-list>
+          <p
+            class="col-start-2 col-span-1 sticky top-0 py-2 border-b px-2 text-center uppercase"
+          >
+            Player 2
+          </p>
+          <x-score-list
+            class="col-start-2 row-start-2 col-span-1 pt-2"
+            id="player2-scores"
+          ></x-score-list>
+        </div>
+      </div>
+      <footer
+        class="border-t-2 flex-shrink-0 absolute top-[calc(100%-44px)] left-0 w-full bg-white transition-transform"
+        data-controller="toggle-class"
+        data-toggle-class-target="toggle"
+        data-toggle-class-class-value="translate-y-[calc(-100%+44px)]"
+      >
+        <div class="x-score-form flex flex-col px-3 pb-3">
+          <button
+            type="button"
+            class="block h-[44px] toggle-form"
+            data-toggle-form
+            data-action="toggle-class#toggle"
+          >
+            Update Score
+          </button>
+          <x-score-form id="score-form"></x-score-form>
+        </div>
+      </footer>
+      <!-- <nav class="mb-6">
+        <a href="games.html" class="text-blue-600 hover:text-blue-800 flex items-center gap-2">
+          ← Back to Games
+        </a>
+      </nav>
+      
+      <div data-controller="game-detail">
+        <x-game-detail></x-game-detail>
+      </div> -->
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+    <script type="module">
+      // Initialize sample data for demo purposes
+      document.addEventListener("DOMContentLoaded", () => {
+        const player1Scores = document.getElementById("player1-scores");
+        const player2Scores = document.getElementById("player2-scores");
+        const scoreForm = document.getElementById("score-form");
+
+        if (player1Scores) {
+          player1Scores.scores = [10, 5, 15, 2, 8];
+        }
+
+        if (player2Scores) {
+          player2Scores.scores = [5, 10, 3, 12, 7];
+        }
+
+        // Set up score form with players
+        if (scoreForm) {
+          scoreForm.players = ["Player 1", "Player 2"];
+
+          // Set up callback for form submission
+          scoreForm.setSubmitCallback((playerIndex, score) => {
+            console.log(
+              `Score submitted for ${scoreForm.players[playerIndex]}: ${score} points`
+            );
+
+            // Add score to the appropriate score list
+            if (playerIndex === 0 && player1Scores) {
+              player1Scores.addScore(score);
+            } else if (playerIndex === 1 && player2Scores) {
+              player2Scores.addScore(score);
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

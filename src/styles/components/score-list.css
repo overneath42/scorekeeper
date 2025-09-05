@@ -1,0 +1,13 @@
+@layer components {
+  .x-score-list {
+    @apply col-start-1 row-start-2 col-span-1 pt-2 border-r;
+  }
+
+  .x-score-list .score-list-item:not(:first-child) {
+    @apply border-t border-dashed;
+  }
+
+  .x-score-list .score-list-item:last-child {
+    @apply border-t-2 border-solid mt-1.5 pt-1.5;
+  }
+}

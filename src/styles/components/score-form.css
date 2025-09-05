@@ -1,0 +1,41 @@
+@import '../variables.css';
+
+.x-score-form {
+  @apply flex flex-col px-3 pb-3;
+}
+
+.x-score-form .toggle-form {
+  @apply block h-11;
+}
+
+.x-score-form .score-form {
+  @apply grid grid-cols-2 auto-rows-min gap-x-6 gap-y-3;
+}
+
+.x-score-form .player-list {
+  @apply list-none p-0 m-0;
+}
+
+.x-score-form .player-list li {
+  @apply mb-2;
+}
+
+.x-score-form .player-list input[type="radio"] {
+  @apply mr-2;
+}
+
+.x-score-form .score-input {
+  @apply border-2 border-gray-300 p-2 col-start-2;
+}
+
+.x-score-form .quick-buttons {
+  @apply col-start-2 flex justify-around gap-3;
+}
+
+.x-score-form .quick-add {
+  @apply flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800 transition-colors;
+}
+
+.x-score-form .submit-score {
+  @apply bg-green-600 text-white px-4 py-2 rounded hover:bg-green-800 col-start-2 transition-colors;
+}

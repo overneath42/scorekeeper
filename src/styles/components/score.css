@@ -1,0 +1,21 @@
+@layer components {
+  .x-score {
+    @apply flex flex-row-reverse justify-between items-baseline gap-2 px-2;
+  }
+
+  .x-score:not(:first-child) {
+    @apply items-baseline border-t border-dashed;
+  }
+
+  .x-score .total-score {
+    @apply text-xl font-semibold;
+  }
+
+  .x-score .total-score.current-score {
+    @apply text-4xl font-semibold;
+  }
+
+  .x-score .increment {
+    @apply text-base italic;
+  }
+}
