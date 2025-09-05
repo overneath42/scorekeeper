@@ -1,0 +1,17 @@
+@layer components {
+  .x-game-header {
+    @apply grid grid-cols-2 grid-rows-2 border-b-2 p-2 flex-shrink-0;
+  }
+
+  .x-game-header .back-link {
+    @apply col-start-1 row-start-1 self-baseline;
+  }
+
+  .x-game-header .edit-button {
+    @apply col-start-2 row-start-1 self-baseline justify-self-end;
+  }
+
+  .x-game-header .title {
+    @apply row-start-2 col-span-2 text-center text-3xl;
+  }
+}

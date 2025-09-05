@@ -1,12 +1,24 @@
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
-import { BaseComponent } from "../utils/index.js";
+import { consume } from "@lit/context";
+import {
+  BaseComponent,
+  gameStoreContext,
+  GameStore,
+} from "../utils/index.js";
 
 @customElement("x-score-list")
 export class ScoreListComponent extends BaseComponent {
+  @consume({ context: gameStoreContext, subscribe: true })
+  @property({ attribute: false })
+  gameStore?: GameStore;
+
   @property({ type: Array })
   scores: number[] = [];
+
+  @property({ type: Number, attribute: "player-index" })
+  playerIndex: number = 0;
 
   @property({ type: String, attribute: "class" })
   additionalClasses: string = "";
@@ -17,6 +29,12 @@ export class ScoreListComponent extends BaseComponent {
 
     if (this.additionalClasses) {
       this.classList.add(...this.additionalClasses.split(" "));
+    }
+  }
+
+  willUpdate() {
+    if (this.gameStore) {
+      this.scores = this.gameStore.getPlayerScores(this.playerIndex);
     }
   }
 

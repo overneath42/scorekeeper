@@ -1,55 +1,37 @@
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { BaseComponent, loadTemplate } from "../utils/index.js";
+import { consume } from "@lit/context";
+import {
+  BaseComponent,
+  gameStoreContext,
+  GameStore,
+  GamePlayer,
+} from "../utils/index.js";
 
 @customElement("x-score-form")
 export class ScoreFormComponent extends BaseComponent {
+  @consume({ context: gameStoreContext, subscribe: true })
+  @property({ attribute: false })
+  gameStore?: GameStore;
+
   @property({ type: Array })
-  players: string[] = [];
+  players: GamePlayer[] = [];
+
+  @property({ type: String })
+  inputValue = "";
 
   @property({ type: Function })
   onScoreSubmit?: (playerIndex: number, score: number) => void;
 
-  async connectedCallback() {
+  connectedCallback() {
     super.connectedCallback();
-
-    try {
-      const templateContent = await loadTemplate(
-        "/templates/score-form.template.html"
-      );
-      this.loadTemplate(templateContent);
-    } catch (error) {
-      console.error("Error loading template:", error);
-    }
-
-    this.renderPlayers();
     this.setupEventListeners();
   }
 
-  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-    super.attributeChangedCallback(name, oldValue, newValue);
-    if (oldValue !== newValue && this.innerHTML) {
-      this.renderPlayers();
+  willUpdate() {
+    if (this.gameStore) {
+      this.players = this.gameStore.getPlayers();
     }
-  }
-
-  private renderPlayers() {
-    const playerList = this.querySelector(".player-list");
-    if (!playerList) return;
-
-    let playerRadios = "";
-
-    this.players.forEach((playerName, index) => {
-      const playerId = `player-${index + 1}`;
-      playerRadios += `
-        <li>
-          <input type="radio" name="player" id="${playerId}" value="${index}" />
-          <label for="${playerId}">${playerName}</label>
-        </li>
-      `;
-    });
-
-    playerList.innerHTML = playerRadios;
   }
 
   private setupEventListeners() {
@@ -75,12 +57,7 @@ export class ScoreFormComponent extends BaseComponent {
   private handleQuickAdd = (event: Event) => {
     const button = event.target as HTMLButtonElement;
     const value = parseInt(button.dataset.value || "0");
-    const scoreInput = this.querySelector(".score-input") as HTMLInputElement;
-
-    if (scoreInput) {
-      const currentValue = parseInt(scoreInput.value) || 0;
-      scoreInput.value = (currentValue + value).toString();
-    }
+    this.inputValue = (parseInt(this.inputValue || "0") + value).toString();
   };
 
   private handleSubmit = (event: Event) => {
@@ -99,16 +76,12 @@ export class ScoreFormComponent extends BaseComponent {
       const score = parseInt(scoreValue.toString());
 
       if (!isNaN(playerIndex) && !isNaN(score)) {
-        // Call the callback if provided
+        // Add score to the store: THIS IS NOT WORKING YET
+        this.gameStore?.addScore(playerIndex, score);
+
+        // Call the callback if provided (for backward compatibility)
         if (this.onScoreSubmit) {
           this.onScoreSubmit(playerIndex, score);
-        } else {
-          // Placeholder callback
-          console.log(
-            `Score submitted for player ${playerIndex + 1} (${
-              this.players[playerIndex]
-            }): ${score} points`
-          );
         }
 
         // Reset form
@@ -161,7 +134,60 @@ export class ScoreFormComponent extends BaseComponent {
   }
 
   render() {
-    return html`${this.templateContent}`;
+    return html`
+      <form
+        class="grid grid-cols-2 auto-rows-min gap-x-6 gap-y-3 score-form"
+        @submit=${this.handleSubmit}
+      >
+        <ul class="player-list row-span-3">
+          ${this.players.map(
+            ({ name, index }) => html`
+              <li>
+                <label>
+                  <input
+                    type="radio"
+                    name="player"
+                    value="${index}"
+                    class="player-radio"
+                  />
+                  ${name}
+                </label>
+              </li>
+            `
+          )}
+        </ul>
+        <input
+          type="number"
+          class="border-2 border-gray-300 p-2 col-start-2 score-input"
+          .value=${this.inputValue || ""}
+          placeholder="Enter score"
+        />
+        <div class="col-start-2 flex justify-around gap-3 quick-buttons">
+          <button
+            type="button"
+            class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800 quick-add"
+            data-value="10"
+            @click=${this.handleQuickAdd}
+          >
+            +10
+          </button>
+          <button
+            type="button"
+            class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800 quick-add"
+            data-value="1"
+            @click=${this.handleQuickAdd}
+          >
+            +1
+          </button>
+        </div>
+        <button
+          type="submit"
+          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-800 col-start-2 submit-score"
+        >
+          Add Points
+        </button>
+      </form>
+    `;
   }
 }
 
