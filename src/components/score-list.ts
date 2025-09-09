@@ -2,11 +2,7 @@ import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 import { consume } from "@lit/context";
-import {
-  BaseComponent,
-  gameStoreContext,
-  GameStore,
-} from "../utils/index.js";
+import { BaseComponent, gameStoreContext, GameStore } from "../utils/index.js";
 
 @customElement("x-score-list")
 export class ScoreListComponent extends BaseComponent {
@@ -67,28 +63,16 @@ export class ScoreListComponent extends BaseComponent {
           runningTotal += score;
           const isCurrentScore = index === lastIndex;
 
-          if (index === 0 || index === lastIndex) {
-            return html`
-              <div class="score-list-item">
-                <x-score
-                  score="${runningTotal}"
-                  ?is-current-score="${isCurrentScore}"
-                >
-                </x-score>
-              </div>
-            `;
-          } else {
-            return html`
-              <div class="score-list-item">
-                <x-score
-                  score="${runningTotal}"
-                  increment="${score}"
-                  ?is-current-score="${isCurrentScore}"
-                >
-                </x-score>
-              </div>
-            `;
-          }
+          return html`
+            <div class="score-list-item">
+              <x-score
+                score="${runningTotal}"
+                increment="${score}"
+                ?is-current-score="${isCurrentScore}"
+              >
+              </x-score>
+            </div>
+          `;
         }
       )}
     `;

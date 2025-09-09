@@ -11,6 +11,7 @@ export default defineConfig({
         contact: "contact.html",
         games: "games.html",
         gameDetail: "game-detail.html",
+        newGame: "new-game.html",
       },
     },
     copyPublicDir: true,

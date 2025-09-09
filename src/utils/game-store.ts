@@ -1,19 +1,6 @@
 import { createContext } from "@lit/context";
 
-export interface GamePlayer {
-  index: number;
-  name: string;
-}
-
-export type GameState = {
-  gameTitle: string;
-  players: GamePlayer[];
-  scoringHistory: [number, number][]; // [playerIndex, points]
-};
-
-// Create context for the game store
-export const gameStoreContext = createContext<GameStore>("game-store");
-
+// Test Date
 const SAMPLE_PLAYERS: GamePlayer[] = [
   { index: 0, name: "Justin" },
   { index: 1, name: "Kelly" },
@@ -30,14 +17,49 @@ const SAMPLE_SCORING_HISTORY: [number, number][] = [
   [1, 10],
 ];
 
+/**
+ * Represents a single score entry for a player.
+ *
+ * @typedef ScoreEntry
+ * @property {number} 0 - The index of the player.
+ * @property {number} 1 - The points scored by the player.
+ */
+export type ScoreEntry = [number, number];
+
+export interface GamePlayer {
+  index: number;
+  name: string;
+}
+
+export interface Game {
+  name: string;
+  targetScore: number | null;
+  players: GamePlayer[];
+  scoringHistory: ScoreEntry[];
+}
+
+export type GameState = {
+  activeGame: Game | null;
+  gamesList: Game[];
+};
+
+// Create context for the game store
+export const gameStoreContext = createContext<GameStore>("game-store");
+
+const SAMPLE_GAME: Game = {
+  name: "Sample Game",
+  targetScore: 100,
+  players: SAMPLE_PLAYERS,
+  scoringHistory: SAMPLE_SCORING_HISTORY,
+};
+
 export class GameStore {
   private state: GameState;
 
   constructor(initialState?: Partial<GameState>) {
     this.state = {
-      gameTitle: initialState?.gameTitle || "New Game",
-      players: initialState?.players || SAMPLE_PLAYERS,
-      scoringHistory: initialState?.scoringHistory || SAMPLE_SCORING_HISTORY,
+      activeGame: initialState?.activeGame || SAMPLE_GAME,
+      gamesList: initialState?.gamesList || [SAMPLE_GAME],
     };
   }
 
@@ -45,62 +67,92 @@ export class GameStore {
   getState(): GameState {
     return {
       ...this.state,
-      players: [...this.state.players],
-      scoringHistory: [...this.state.scoringHistory],
+      activeGame: this.state.activeGame ? { ...this.state.activeGame } : null,
     };
   }
 
   // Actions
-  setGameTitle(title: string): void {
-    this.state.gameTitle = title;
+  setActiveGame(game: Game): void {
+    this.state.activeGame = game;
   }
 
-  setPlayers(players: string[]): void {
-    this.state.players = players.map((name, index) => ({ index, name }));
+  setGameTitle(title: string): void {
+    this.state.activeGame = this.state.activeGame
+      ? { ...this.state.activeGame, name: title }
+      : null;
+  }
+
+  setPlayers(players: GamePlayer[]): void {
+    this.state.activeGame = this.state.activeGame ? { ...this.state.activeGame, players } : null;
+  }
+
+  addGame(game: Game): void {
+    this.state.gamesList = [...this.state.gamesList, game];
   }
 
   addScore(playerIndex: number, points: number): void {
-    this.state.scoringHistory.push([playerIndex, points]);
+    this.state.activeGame = this.state.activeGame
+      ? {
+          ...this.state.activeGame,
+          scoringHistory: [...this.state.activeGame.scoringHistory, [playerIndex, points]],
+        }
+      : null;
   }
 
   // Computed getters
+  getActiveGame(): Game | null {
+    return this.state.activeGame;
+  }
+
+  getGameTitle(): string {
+    return this.state.activeGame ? this.state.activeGame.name : "No Game";
+  }
+
   getPlayers(): { index: number; name: string }[] {
-    return this.state.players;
+    return this.state.activeGame ? this.state.activeGame.players : [];
   }
 
   getPlayerScores(playerIndex: number): number[] {
-    return this.state.scoringHistory
-      .filter(([pIndex]) => pIndex === playerIndex)
-      .map(([, points]) => points);
+    return this.state.activeGame
+      ? this.state.activeGame.scoringHistory
+          .filter(([pIndex]: [number, number]) => pIndex === playerIndex)
+          .map(([, points]: [number, number]) => points)
+      : [];
   }
 
   getTotalScore(playerIndex: number): number {
-    return this.getPlayerScores(playerIndex).reduce(
-      (sum, score) => sum + score,
-      0
-    );
+    return this.getPlayerScores(playerIndex).reduce((sum, score) => sum + score, 0);
   }
 
   getCurrentScores(): { [playerIndex: number]: number } {
     const scores: { [playerIndex: number]: number } = {};
-    this.state.players.forEach((player) => {
+    this.state.activeGame?.players.forEach((player) => {
       scores[player.index] = this.getTotalScore(player.index);
     });
     return scores;
   }
 
+  getGamesList(): Game[] {
+    return [...this.state.gamesList];
+  }
+
+  clearActiveGame(): void {
+    this.state.activeGame = null;
+  }
+
   // Reset game
   resetGame(): void {
-    this.state.scoringHistory = [];
+    if (!this.state.activeGame) return;
+
+    this.state.activeGame = {
+      ...this.state.activeGame,
+      scoringHistory: [],
+    };
   }
 
   // Clear all data
   clearGame(): void {
-    this.state = {
-      gameTitle: "New Game",
-      players: [],
-      scoringHistory: [],
-    };
+    this.state.activeGame = null;
   }
 }
 

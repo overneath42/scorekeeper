@@ -1,11 +1,7 @@
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { consume } from "@lit/context";
-import {
-  gameStoreContext,
-  GameStore,
-  BaseComponent,
-} from "../utils/index.js";
+import { gameStoreContext, GameStore, BaseComponent } from "../utils/index.js";
 
 @customElement("x-game-player-name")
 export class GamePlayerNameComponent extends BaseComponent {
@@ -21,7 +17,9 @@ export class GamePlayerNameComponent extends BaseComponent {
 
   willUpdate() {
     if (this.gameStore) {
-      const player = this.gameStore.getState().players.find((p) => p.index === this.playerIndex);
+      const player = this.gameStore
+        .getPlayers()
+        .find((p) => p.index === this.playerIndex);
       this.playerName = player?.name || `Player ${this.playerIndex + 1}`;
     }
   }

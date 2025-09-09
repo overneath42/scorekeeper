@@ -3,6 +3,8 @@
 @import './components/score-list.css';
 @import './components/score.css';
 @import './components/score-form.css';
+@import './utilities/buttons.css';
+@import './utilities/forms.css';
 
 @tailwind base;
 @tailwind components;

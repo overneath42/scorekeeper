@@ -9,46 +9,27 @@
     <x-game-store-provider>
       <main class="h-full flex flex-col container mx-auto relative">
         <x-game-header back-url="games.html"></x-game-header>
-      <div class="flex-1 overflow-auto">
-        <div class="grid grid-cols-2 grid-rows-[min-content_1fr] h-full">
-          <p
-            class="col-start-1 col-span-1 sticky top-0 py-2 border-b border-r text-center uppercase"
-          >
-            <x-game-player-name player-index="0"></x-game-player-name>
-          </p>
-          <x-score-list
-            class="col-start-1 row-start-2 col-span-1 pt-2 border-r"
-            player-index="0"
-          ></x-score-list>
-          <p
-            class="col-start-2 col-span-1 sticky top-0 py-2 border-b px-2 text-center uppercase"
-          >
-            <x-game-player-name player-index="1"></x-game-player-name>
-          </p>
-          <x-score-list
-            class="col-start-2 row-start-2 col-span-1 pt-2"
-            player-index="1"
-          ></x-score-list>
+        <div class="flex-1 overflow-hidden">
+          <x-game-detail></x-game-detail>
         </div>
-      </div>
-      <footer
-        class="border-t-2 flex-shrink-0 absolute top-[calc(100%-44px)] left-0 w-full bg-white transition-transform"
-        data-controller="toggle-class"
-        data-toggle-class-target="toggle"
-        data-toggle-class-class-value="translate-y-[calc(-100%+44px)]"
-      >
-        <div class="x-score-form flex flex-col px-3 pb-3">
-          <button
-            type="button"
-            class="block h-[44px] toggle-form"
-            data-toggle-form
-            data-action="toggle-class#toggle"
-          >
-            Update Score
-          </button>
-          <x-score-form id="score-form"></x-score-form>
-        </div>
-      </footer>
+        <footer
+          class="border-t-2 flex-shrink-0 absolute top-[calc(100%-44px)] left-0 w-full bg-white transition-transform"
+          data-controller="toggle-class"
+          data-toggle-class-target="toggle"
+          data-toggle-class-class-value="translate-y-[calc(-100%+44px)]">
+          <div class="flex flex-col px-3 pb-3">
+            <div class="h-[44px] flex items-center justify-center">
+              <button
+                type="button"
+                class="btn-sm btn-primary w-full toggle-form"
+                data-toggle-form
+                data-action="toggle-class#toggle">
+                Update Score
+              </button>
+            </div>
+            <x-score-form id="score-form"></x-score-form>
+          </div>
+        </footer>
       </main>
     </x-game-store-provider>
 

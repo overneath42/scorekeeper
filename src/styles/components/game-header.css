@@ -1,10 +1,10 @@
 @layer components {
   .x-game-header {
-    @apply grid grid-cols-2 grid-rows-2 border-b-2 p-2 flex-shrink-0;
+    @apply grid grid-cols-2 grid-rows-2 border-b-2 p-2 gap-y-2 flex-shrink-0 bg-gray-50;
   }
 
   .x-game-header .back-link {
-    @apply col-start-1 row-start-1 self-baseline;
+    @apply col-start-1 row-start-1 self-baseline justify-self-start;
   }
 
   .x-game-header .edit-button {
@@ -12,6 +12,6 @@
   }
 
   .x-game-header .title {
-    @apply row-start-2 col-span-2 text-center text-3xl;
+    @apply row-start-2 col-span-2 text-center text-3xl font-semibold;
   }
 }
