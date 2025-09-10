@@ -26,6 +26,21 @@ export default {
           DEFAULT: "#6B7280", // Gray-500
           dark: "#374151", // Gray-700
         },
+        success: {
+          DEFAULT: "#22C55E", // Green-500
+          light: "#4ADE80", // Green-400
+          dark: "#16A34A", // Green-600
+        },
+        warning: {
+          DEFAULT: "#F59E0B", // Amber-500
+          light: "#FBBF24", // Amber-400
+          dark: "#D97706", // Amber-600
+        },
+        error: {
+          DEFAULT: "#EF4444", // Red-500
+          light: "#F87171", // Red-400
+          dark: "#DC2626", // Red-600
+        },
       },
     },
   },

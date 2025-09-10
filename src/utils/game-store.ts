@@ -20,7 +20,6 @@ const SAMPLE_SCORING_HISTORY: [number, number][] = [
 /**
  * Represents a single score entry for a player.
  *
- * @typedef ScoreEntry
  * @property {number} 0 - The index of the player.
  * @property {number} 1 - The points scored by the player.
  */
@@ -43,7 +42,6 @@ export type GameState = {
   gamesList: Game[];
 };
 
-// Create context for the game store
 export const gameStoreContext = createContext<GameStore>("game-store");
 
 const SAMPLE_GAME: Game = {
@@ -53,10 +51,11 @@ const SAMPLE_GAME: Game = {
   scoringHistory: SAMPLE_SCORING_HISTORY,
 };
 
-export class GameStore {
+export class GameStore extends EventTarget {
   private state: GameState;
 
   constructor(initialState?: Partial<GameState>) {
+    super();
     this.state = {
       activeGame: initialState?.activeGame || SAMPLE_GAME,
       gamesList: initialState?.gamesList || [SAMPLE_GAME],
@@ -74,16 +73,21 @@ export class GameStore {
   // Actions
   setActiveGame(game: Game): void {
     this.state.activeGame = game;
+    this.dispatchEvent(new CustomEvent("statechange", { detail: { action: "setActiveGame" } }));
   }
 
   setGameTitle(title: string): void {
     this.state.activeGame = this.state.activeGame
       ? { ...this.state.activeGame, name: title }
       : null;
+    this.dispatchEvent(
+      new CustomEvent("statechange", { detail: { action: "setGameTitle", title } })
+    );
   }
 
   setPlayers(players: GamePlayer[]): void {
     this.state.activeGame = this.state.activeGame ? { ...this.state.activeGame, players } : null;
+    this.dispatchEvent(new CustomEvent("statechange", { detail: { action: "setPlayers" } }));
   }
 
   addGame(game: Game): void {
@@ -97,6 +101,9 @@ export class GameStore {
           scoringHistory: [...this.state.activeGame.scoringHistory, [playerIndex, points]],
         }
       : null;
+    this.dispatchEvent(
+      new CustomEvent("statechange", { detail: { action: "addScore", playerIndex, points } })
+    );
   }
 
   // Computed getters
@@ -138,6 +145,7 @@ export class GameStore {
 
   clearActiveGame(): void {
     this.state.activeGame = null;
+    this.dispatchEvent(new CustomEvent("statechange", { detail: { action: "clearActiveGame" } }));
   }
 
   // Reset game
@@ -148,11 +156,13 @@ export class GameStore {
       ...this.state.activeGame,
       scoringHistory: [],
     };
+    this.dispatchEvent(new CustomEvent("statechange", { detail: { action: "resetGame" } }));
   }
 
   // Clear all data
   clearGame(): void {
     this.state.activeGame = null;
+    this.dispatchEvent(new CustomEvent("statechange", { detail: { action: "clearGame" } }));
   }
 }
 

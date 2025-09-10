@@ -1,6 +1,8 @@
 @layer utilities {
   .btn-common {
-    @apply inline-flex items-center justify-center rounded transition-colors;
+    @apply inline-flex items-center justify-center rounded duration-200 ease-in-out;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke,
+      opacity;
   }
 
   .btn {

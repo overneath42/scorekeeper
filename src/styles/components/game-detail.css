@@ -1,0 +1,32 @@
+@layer components {
+  .game-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns, 1), minmax(var(--player-width, 100%), 1fr));
+    grid-template-rows: min-content 1fr min-content;
+    min-width: var(--min-width, 100%);
+    height: calc(100% - var(--form-height, 44px));
+  }
+
+  .player-header {
+    grid-row: 1;
+    scroll-snap-align: start;
+  }
+
+  .player-score-lists {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns, 1), minmax(var(--player-width, 100%), 1fr));
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+  }
+
+  .player-score-list .score-list-item {
+    @apply border-t border-dashed;
+  }
+
+  .player-current-score {
+    grid-row: 3;
+    scroll-snap-align: start;
+  }
+}

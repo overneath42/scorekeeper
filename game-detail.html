@@ -6,32 +6,11 @@
     <title>Game Detail - Scorekeeper</title>
   </head>
   <body class="h-screen overflow-hidden">
-    <x-game-store-provider>
+    <x-game-provider>
       <main class="h-full flex flex-col container mx-auto relative">
-        <x-game-header back-url="games.html"></x-game-header>
-        <div class="flex-1 overflow-hidden">
-          <x-game-detail></x-game-detail>
-        </div>
-        <footer
-          class="border-t-2 flex-shrink-0 absolute top-[calc(100%-44px)] left-0 w-full bg-white transition-transform"
-          data-controller="toggle-class"
-          data-toggle-class-target="toggle"
-          data-toggle-class-class-value="translate-y-[calc(-100%+44px)]">
-          <div class="flex flex-col px-3 pb-3">
-            <div class="h-[44px] flex items-center justify-center">
-              <button
-                type="button"
-                class="btn-sm btn-primary w-full toggle-form"
-                data-toggle-form
-                data-action="toggle-class#toggle">
-                Update Score
-              </button>
-            </div>
-            <x-score-form id="score-form"></x-score-form>
-          </div>
-        </footer>
+        <x-game-detail class="flex-1"></x-game-detail>
       </main>
-    </x-game-store-provider>
+    </x-game-provider>
 
     <script type="module" src="/src/main.ts"></script>
     <script type="module">

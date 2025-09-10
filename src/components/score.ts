@@ -21,18 +21,10 @@ export class ScoreComponent extends BaseComponent {
           : `${this.increment}`
         : null;
 
-    const scoreClass = this.isCurrentScore
-      ? "total-score current-score"
-      : "total-score";
-    const itemClass =
-      this.increment !== undefined ? "x-score has-increment" : "x-score";
-
     return html`
-      <div class="${itemClass}">
-        <span class="${scoreClass}">${this.score}</span>
-        ${incrementText
-          ? html`<span class="increment">${incrementText}</span>`
-          : ""}
+      <div class="x-score">
+        <span class="total-score">${this.score}</span>
+        ${incrementText ? html`<span class="increment">${incrementText}</span>` : ""}
       </div>
     `;
   }

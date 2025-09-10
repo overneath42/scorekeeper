@@ -1,7 +1,9 @@
-import { CSSResult, html, LitElement, TemplateResult } from "lit";
+import { html, LitElement, TemplateResult } from "lit";
+import { property } from "lit/decorators.js";
 
 export class BaseComponent extends LitElement {
-  protected templateContent: string = "";
+  @property({ type: String, attribute: "class" })
+  additionalClasses: string = "";
 
   constructor() {
     super();
@@ -16,19 +18,11 @@ export class BaseComponent extends LitElement {
     return html``;
   }
 
-  protected loadTemplate(template: string): void {
-    this.templateContent = template;
-    this.renderTemplate();
-  }
-
-  private renderTemplate(): void {
-    this.innerHTML = this.templateContent;
-  }
-
-  static styles?: CSSResult | CSSResult[];
-
   connectedCallback(): void {
     super.connectedCallback();
-    this.classList.add("web-component");
+
+    if (this.additionalClasses) {
+      this.classList.add(...this.additionalClasses.split(" "));
+    }
   }
 }
