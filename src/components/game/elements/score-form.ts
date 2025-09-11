@@ -4,7 +4,7 @@ import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { createRef, ref, Ref } from "lit/directives/ref.js";
 import { gameContext, type GameContext } from "@/context";
-import { BaseComponent, safeCall } from "@/utils";
+import { BaseComponent } from "@/utils";
 
 @customElement("x-game-score-form")
 export class GameScoreFormComponent extends BaseComponent {
@@ -22,7 +22,7 @@ export class GameScoreFormComponent extends BaseComponent {
 
   formRef: Ref<HTMLFormElement> = createRef();
 
-  get players() {
+  private get players() {
     return this.game?.players || [];
   }
 
@@ -40,7 +40,7 @@ export class GameScoreFormComponent extends BaseComponent {
       const score = parseInt(this.inputValue);
 
       if (!isNaN(playerIndex) && !isNaN(score)) {
-        safeCall(this.game?.addScore, [playerIndex, score]);
+        this.game?.addScore(playerIndex, score);
         this.clearForm();
         this.toggleFormVisibility(false);
       }
@@ -76,38 +76,10 @@ export class GameScoreFormComponent extends BaseComponent {
     subheader.style.pointerEvents = isVisible ? "auto" : "none";
   };
 
-  // Public method to set the submit callback
-  setSubmitCallback(callback: (playerIndex: number, score: number) => void) {
-    this.onScoreSubmit = callback;
-  }
-
-  clearForm() {
+  private clearForm() {
     this.inputValue = "";
     this.selectedPlayerIndex = null;
     this.formRef.value?.reset();
-  }
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    // Emit form height after component is rendered
-    this.updateComplete.then(() => {
-      this.emitFormHeight();
-    });
-  }
-
-  private emitFormHeight() {
-    const wrapper = this.querySelector("[data-score-form-wrapper]") as HTMLElement;
-    if (wrapper) {
-      console.dir(wrapper);
-      const height = wrapper.clientHeight;
-      // const height = wrapper.offsetHeight;
-      this.dispatchEvent(
-        new CustomEvent("form-height-updated", {
-          detail: { height },
-          bubbles: true,
-        })
-      );
-    }
   }
 
   render() {
@@ -157,6 +129,10 @@ export class GameScoreFormComponent extends BaseComponent {
                 type="number"
                 class="form-input"
                 .value=${this.inputValue || ""}
+                @input=${(e: Event) => {
+                  const input = e.target as HTMLInputElement;
+                  this.inputValue = input.value;
+                }}
                 placeholder="Enter score" />
               <div class="flex justify-around gap-x-3">
                 <button

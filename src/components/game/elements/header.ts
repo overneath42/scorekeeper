@@ -10,8 +10,8 @@ export class GameHeaderComponent extends BaseComponent {
   @property({ attribute: false })
   game?: GameContext;
 
-  @property({ type: String })
-  backUrl: string = "games.html";
+  @property({ type: String, attribute: "back-url" })
+  backUrl: string = "/";
 
   get title() {
     return this.game?.name || "Untitled Game";
@@ -30,7 +30,11 @@ export class GameHeaderComponent extends BaseComponent {
   }
 
   handleEditGame() {
-    window.location.href = "new-game.html";
+    const url = new URL("edit.html", window.location.href);
+    if (this.game && this.game.id) {
+      url.searchParams.set("id", this.game.id);
+    }
+    window.location.href = url.toString();
   }
 
   render() {

@@ -30,33 +30,31 @@ export class GameDetailFormComponent extends BaseComponent {
 
   storage = GameStorageService.getInstance();
 
-  connectedCallback() {
-    super.connectedCallback();
-    // this.populateFromActiveGame();
+  get isEditMode() {
+    return this.context === "edit";
   }
 
-  // willUpdate() {
-  //   if (this.gameStore && !this.isEditMode) {
-  //     this.populateFromActiveGame();
-  //   }
-  // }
+  connectedCallback() {
+    super.connectedCallback();
+    if (this.context === "edit") {
+      this.populateForm();
+    }
+  }
 
-  private populateFromActiveGame() {
-    // if (this.gameStore) {
-    //   const activeGame = this.gameStore.getActiveGame();
-    //   if (activeGame) {
-    //     this.isEditMode = true;
-    //     this.gameName = activeGame.name;
-    //     this.targetScore = activeGame.targetScore;
-    //     this.players = activeGame.players.map((player) => player.name);
-    //   } else {
-    //     this.isEditMode = false;
-    //     // Reset to defaults when no active game
-    //     this.gameName = "";
-    //     this.targetScore = null;
-    //     this.players = ["Player 1", "Player 2"];
-    //   }
-    // }
+  private populateForm() {
+    const id = new URLSearchParams(window.location.search).get("id");
+
+    if (id) {
+      const storedGame = this.storage.getStoredGame(id);
+
+      if (storedGame) {
+        this.gameName = storedGame.name;
+        this.targetScore = storedGame.targetScore;
+        this.players = storedGame.players.map((player) => player.name);
+      } else {
+        console.warn(`No stored game found with ID: ${id}`);
+      }
+    }
   }
 
   private handleSubmit(e: Event) {
@@ -83,27 +81,30 @@ export class GameDetailFormComponent extends BaseComponent {
   }
 
   private handleEditSubmit() {
-    // if (this.gameStore) {
-    //   // Update the active game with new details
-    //   this.gameStore.setGameTitle(this.gameName);
-    //   // Update players, preserving existing player indices if possible
-    //   const updatedPlayers = this.players.map((name, index) => ({
-    //     index,
-    //     name,
-    //   }));
-    //   this.gameStore.setPlayers(updatedPlayers);
-    //   // Update target score by reconstructing the active game
-    //   const activeGame = this.gameStore.getActiveGame();
-    //   if (activeGame) {
-    //     const updatedGame: Game = {
-    //       ...activeGame,
-    //       targetScore: this.targetScore,
-    //     };
-    //     this.gameStore.setActiveGame(updatedGame);
-    //   }
-    // }
-    // Navigate back to game detail
-    // window.location.href = "game-detail.html";
+    const id = new URLSearchParams(window.location.search).get("id");
+
+    if (id) {
+      const existingGame = this.storage.getStoredGame(id);
+
+      if (existingGame) {
+        const updatedGame = {
+          ...existingGame,
+          name: this.gameName,
+          targetScore: this.targetScore,
+          players: this.players.map((playerName, index) => ({
+            index,
+            name: playerName,
+          })),
+          updatedAt: new Date(),
+        };
+
+        this.storage.saveGame(updatedGame);
+        this.gameList?.updateGame(updatedGame);
+        this.redirectToGameboard(updatedGame.id);
+      } else {
+        console.warn(`No stored game found with ID: ${id}`);
+      }
+    }
   }
 
   private handlePlayersChanged(e: CustomEvent) {

@@ -3,35 +3,41 @@ import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { BaseComponent } from "@/utils";
 import { type GameListContext, gameListContext } from "@/context";
-import { type StoredGame } from "@/services";
+import { GameStorageService, type StoredGame } from "@/services";
 
 @customElement("x-game-list-provider")
 export class GameListProviderComponent extends BaseComponent {
+  private storage = GameStorageService.getInstance();
+
   private getAllGames = () => {
-    return this.gameList.games;
+    return this.storage.getAllStoredGames();
   };
 
   private addGame = (game: StoredGame) => {
-    this.gameList.games = [...this.gameList.games, game];
+    this.storage.saveGame(game);
     this.requestUpdate();
   };
 
   private removeGame = (id: string) => {
-    this.gameList.games = this.gameList.games.filter(game => game.id !== id);
+    this.storage.deleteGame(id);
     this.requestUpdate();
   };
 
   private updateGame = (updatedGame: StoredGame) => {
-    this.gameList.games = this.gameList.games.map(game => 
-      game.id === updatedGame.id ? updatedGame : game
-    );
+    this.storage.saveGame(updatedGame);
     this.requestUpdate();
   };
 
   private clearGames = () => {
-    this.gameList.games = [];
+    this.storage.clearAllGames();
     this.requestUpdate();
   };
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.gameList.games = this.storage.getAllStoredGames();
+    console.log("Loaded games:", this.gameList.games);
+  }
 
   @provide({ context: gameListContext })
   @property({ type: Object, attribute: false })

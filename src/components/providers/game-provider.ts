@@ -2,75 +2,61 @@ import { provide } from "@lit/context";
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { gameContext, type GameContext } from "@/context";
-import { BaseComponent } from "@/utils";
-import type { Game, GamePlayer, ScoreEntry } from "@/types/index.js";
+import { BaseComponent, type Game, type GamePlayer } from "@/utils";
+import { GameStorageService, type StoredGame } from "@/services";
 
-// Test Data!
-const SAMPLE_PLAYERS: GamePlayer[] = [
-  { index: 0, name: "Justin" },
-  { index: 1, name: "Kelly" },
-];
-
-const SAMPLE_SCORING_HISTORY: ScoreEntry[] = [
-  [0, 10],
-  [1, 15],
-  [0, 5],
-  [1, 20],
-  [0, 10],
-  [1, 20],
-  [0, 1],
-  [1, 10],
-];
-
-const SAMPLE_GAME: Game = {
-  name: "Sample Game",
-  targetScore: 100,
-  players: SAMPLE_PLAYERS,
-  scoringHistory: SAMPLE_SCORING_HISTORY,
-};
+const now = new Date();
 
 @customElement("x-game-provider")
 export class GameProviderComponent extends BaseComponent {
-  private createNewGame = (name: string, targetScore: number, players: string[]) => {
-    const newGame: Game = {
-      name,
-      targetScore,
-      players: players.map((playerName, index) => ({
-        index,
-        name: playerName,
-      })),
-      scoringHistory: [],
-    };
+  private storage = GameStorageService.getInstance();
+  private currentGameId: string | null = null;
 
-    this.game = {
-      ...this.game,
-      ...newGame,
-    };
+  private createNewGame = (name: string, targetScore: number, players: string[]) => {
+    const storedGame = this.storage.createGame(name, players, targetScore);
+    this.currentGameId = storedGame.id;
+    this.loadGame(storedGame);
   };
 
   private updateGame = (game: Game) => {
-    this.game = {
-      ...this.game,
-      ...game,
-    };
+    if (this.currentGameId) {
+      this.storage.updateGame(this.currentGameId, game);
+      const updatedGame = this.storage.getStoredGame(this.currentGameId);
+      if (updatedGame) {
+        this.loadGame(updatedGame);
+      }
+    }
   };
 
   private addScore = (playerIndex: number, score: number) => {
-    this.game = {
-      ...this.game,
-      scoringHistory: [...this.game.scoringHistory, [playerIndex, score]],
-    };
+    if (this.currentGameId) {
+      this.storage.addScore(this.currentGameId, playerIndex, score);
+      const updatedGame = this.storage.getStoredGame(this.currentGameId);
+      if (updatedGame) {
+        this.loadGame(updatedGame);
+      }
+    }
   };
 
   private getPlayerCurrentScore = (playerIndex: number): number => {
-    const playerScores = this.getPlayerScoringHistory(playerIndex);
-    return playerScores.length > 0 ? playerScores.reduce((a, b) => a + b, 0) : 0;
+    if (this.currentGameId) {
+      const storedGame = this.storage.getStoredGame(this.currentGameId);
+      if (storedGame) {
+        const scores = this.storage.calculatePlayerScores(storedGame);
+        return scores[playerIndex] || 0;
+      }
+    }
+    return 0;
   };
 
   private getPlayerScoringHistory = (playerIndex: number): number[] => {
-    return this.game.scoringHistory
-      .filter(([pIndex]: ScoreEntry) => pIndex === playerIndex)
-      .map(([, points]: ScoreEntry) => points);
+    if (this.currentGameId) {
+      const storedGame = this.storage.getStoredGame(this.currentGameId);
+      if (storedGame) {
+        return this.storage.getPlayerScoringHistory(storedGame, playerIndex);
+      }
+    }
+    return [];
   };
 
   private getCurrentWinner = (): GamePlayer[] => {
@@ -85,13 +71,40 @@ export class GameProviderComponent extends BaseComponent {
     return this.getCurrentWinner().some((player) => player.index === playerIndex);
   };
 
+  private loadGame = (storedGame: StoredGame) => {
+    this.game = {
+      ...storedGame,
+      createNewGame: this.createNewGame,
+      updateGame: this.updateGame,
+      addScore: this.addScore,
+      getPlayerScoringHistory: this.getPlayerScoringHistory,
+      getPlayerCurrentScore: this.getPlayerCurrentScore,
+      isCurrentWinner: this.isCurrentWinner,
+      loadGameById: this.loadGameById,
+    };
+    this.requestUpdate();
+  };
+
+  loadGameById = (gameId: string) => {
+    const storedGame = this.storage.getStoredGame(gameId);
+    if (storedGame) {
+      this.currentGameId = gameId;
+      this.loadGame(storedGame);
+    }
+  };
+
   @provide({ context: gameContext })
   @property({ type: Object, attribute: false })
   game: GameContext = {
+    id: "",
+    timecode: "",
     name: "",
     targetScore: null,
     players: [],
     scoringHistory: [],
+    createdAt: now,
+    updatedAt: now,
+    status: "active",
     // For easy testing/development, uncomment to start with sample data
     // ...SAMPLE_GAME,
     createNewGame: this.createNewGame,
@@ -100,6 +113,7 @@ export class GameProviderComponent extends BaseComponent {
     getPlayerScoringHistory: this.getPlayerScoringHistory,
     getPlayerCurrentScore: this.getPlayerCurrentScore,
     isCurrentWinner: this.isCurrentWinner,
+    loadGameById: this.loadGameById,
   };
 
   render() {

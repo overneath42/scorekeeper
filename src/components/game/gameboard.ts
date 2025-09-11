@@ -38,37 +38,17 @@ export class GameboardComponent extends BaseComponent {
 
   connectedCallback(): void {
     super.connectedCallback();
-    // this.addEventListener("form-height-updated", this.handleFormHeightUpdate);
-
     this.handleSetGame();
-    this.updateComplete.then(() => {
-      this.wrapperHeight = this.wrapperRef.value?.clientHeight || 0;
-    });
-  }
-
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this.removeEventListener("form-height-updated", this.handleFormHeightUpdate);
   }
 
   private handleSetGame() {
     const id = new URLSearchParams(window.location.search).get("id");
     if (id && this.game) {
-      const storedGame = this.storage.getStoredGame(id);
-
-      if (storedGame) {
-        this.game.updateGame(storedGame);
-      } else {
-        console.warn(`No stored game found with ID: ${id}`);
-      }
+      this.game.loadGameById(id);
+    } else {
+      console.warn("No game ID provided in URL");
     }
   }
-
-  private handleFormHeightUpdate = (event: Event) => {
-    const customEvent = event as CustomEvent<{ height: number }>;
-    this.formHeight = customEvent.detail.height;
-    this.requestUpdate();
-  };
 
   get players() {
     return this.game?.players || [];
@@ -89,7 +69,7 @@ export class GameboardComponent extends BaseComponent {
     return html`
       <div class="flex flex-col h-full w-full">
         <div class="flex-1 flex flex-col overflow-hidden">
-          <x-game-header back-url="games.html"></x-game-header>
+          <x-game-header back-url="/"></x-game-header>
           <div class="overflow-hidden flex-1">${this.renderGame()}</div>
         </div>
       </div>

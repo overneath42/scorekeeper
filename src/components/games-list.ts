@@ -11,11 +11,8 @@ export class GamesListComponent extends BaseComponent {
   @property({ attribute: false })
   gameList?: GameListContext;
 
-  private selectGame(game: Game) {
-    // this.gameList?.setActiveGame(game);
-
-    // Navigate to game detail view
-    window.location.href = "game-detail.html";
+  private selectGame(gameId: string) {
+    window.location.href = `play.html?id=${gameId}`;
   }
 
   private deleteGame(game: Game, event: Event) {
@@ -61,7 +58,7 @@ export class GamesListComponent extends BaseComponent {
       return html`<div class="text-center text-gray-500">Loading games...</div>`;
     }
 
-    const games = this.gameList.getGamesList();
+    const games = this.gameList.getAllGames();
 
     if (games.length === 0) {
       return html`
@@ -78,7 +75,7 @@ export class GamesListComponent extends BaseComponent {
           (game) => html`
             <div
               class="border-b p-4 hover:bg-blue-50 transition-colors cursor-pointer"
-              @click="${() => this.selectGame(game)}">
+              @click="${() => this.selectGame(game.id)}">
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <h3 class="font-semibold text-gray-900 mb-2">${game.name}</h3>
