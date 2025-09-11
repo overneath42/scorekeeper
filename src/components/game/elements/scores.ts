@@ -2,12 +2,11 @@ import { consume } from "@lit/context";
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
-import type { GameContext } from "../utils/context/game-context.js";
-import { gameContext } from "../utils/context/game-context.js";
-import { BaseComponent, safeCall } from "../utils/index.js";
+import { gameContext, type GameContext } from "@/context";
+import { BaseComponent, safeCall } from "@/utils";
 
-@customElement("x-score-list")
-export class ScoreListComponent extends BaseComponent {
+@customElement("x-game-scores")
+export class GameScoresComponent extends BaseComponent {
   @consume({ context: gameContext, subscribe: true })
   game?: GameContext;
 
@@ -36,11 +35,11 @@ export class ScoreListComponent extends BaseComponent {
 
           return html`
             <div class="score-list-item">
-              <x-score
+              <x-game-score
                 score="${runningTotal}"
                 increment="${score}"
                 ?is-current-score="${isCurrentScore}">
-              </x-score>
+              </x-game-score>
             </div>
           `;
         }
@@ -51,6 +50,6 @@ export class ScoreListComponent extends BaseComponent {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "x-score-list": ScoreListComponent;
+    "x-game-scores": GameScoresComponent;
   }
 }

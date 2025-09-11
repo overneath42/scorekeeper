@@ -1,10 +1,9 @@
+import { provide } from "@lit/context";
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { provide } from "@lit/context";
-import { gameContext } from "../../utils/context/game-context.js";
-import type { GameContext } from "../../utils/context/game-context.js";
-import type { Game, GamePlayer, ScoreEntry } from "../../types/index.js";
-import { BaseComponent } from "../../utils/base-component.js";
+import { gameContext, type GameContext } from "@/context";
+import { BaseComponent } from "@/utils";
+import type { Game, GamePlayer, ScoreEntry } from "@/types/index.js";
 
 // Test Data!
 const SAMPLE_PLAYERS: GamePlayer[] = [
@@ -32,6 +31,23 @@ const SAMPLE_GAME: Game = {
 
 @customElement("x-game-provider")
 export class GameProviderComponent extends BaseComponent {
+  private createNewGame = (name: string, targetScore: number, players: string[]) => {
+    const newGame: Game = {
+      name,
+      targetScore,
+      players: players.map((playerName, index) => ({
+        index,
+        name: playerName,
+      })),
+      scoringHistory: [],
+    };
+
+    this.game = {
+      ...this.game,
+      ...newGame,
+    };
+  };
+
   private updateGame = (game: Game) => {
     this.game = {
       ...this.game,
@@ -72,7 +88,13 @@ export class GameProviderComponent extends BaseComponent {
   @provide({ context: gameContext })
   @property({ type: Object, attribute: false })
   game: GameContext = {
-    ...SAMPLE_GAME,
+    name: "",
+    targetScore: null,
+    players: [],
+    scoringHistory: [],
+    // For easy testing/development, uncomment to start with sample data
+    // ...SAMPLE_GAME,
+    createNewGame: this.createNewGame,
     updateGame: this.updateGame,
     addScore: this.addScore,
     getPlayerScoringHistory: this.getPlayerScoringHistory,

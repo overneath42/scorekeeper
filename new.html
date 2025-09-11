@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Game - Scorekeeper</title>
+  </head>
+  <body class="h-screen overflow-hidden">
+    <x-game-list-provider>
+      <main class="h-full flex flex-col container mx-auto max-w-2xl gap-md">
+        <header class="flex-shrink-0 p-md border-b flex flex-col-reverse gap-md bg-gray-light">
+          <h1 id="page-title" class="text-4xl font-bold text-gray-900">Start A New Game</h1>
+          <a href="games.html" class="btn-sm btn-secondary self-start">&larr; All Games</a>
+        </header>
+
+        <div class="flex-1 overflow-auto">
+          <x-game-detail-form></x-game-detail-form>
+        </div>
+      </main>
+    </x-game-list-provider>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

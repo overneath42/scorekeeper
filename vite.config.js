@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 
+/** @type {import('vite').UserConfig} */
 export default defineConfig({
   root: ".",
   build: {
@@ -10,8 +11,9 @@ export default defineConfig({
         about: "about.html",
         contact: "contact.html",
         games: "games.html",
-        gameDetail: "game-detail.html",
-        newGame: "new-game.html",
+        play: "play.html",
+        new: "new.html",
+        edit: "edit.html",
       },
     },
     copyPublicDir: true,
@@ -21,4 +23,9 @@ export default defineConfig({
     port: 3000,
   },
   publicDir: "src",
+  resolve: {
+    alias: {
+      "@": "/src",
+    },
+  },
 });

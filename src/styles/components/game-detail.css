@@ -4,7 +4,7 @@
     grid-template-columns: repeat(var(--grid-columns, 1), minmax(var(--player-width, 100%), 1fr));
     grid-template-rows: min-content 1fr min-content;
     min-width: var(--min-width, 100%);
-    height: calc(100% - var(--form-height, 44px));
+    height: 100%;
   }
 
   .player-header {

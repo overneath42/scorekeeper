@@ -1,9 +1,9 @@
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { BaseComponent } from "../utils/index.js";
+import { BaseComponent } from "@/utils/index.js";
 
-@customElement("x-score")
-export class ScoreComponent extends BaseComponent {
+@customElement("x-game-score")
+export class GameScoreComponent extends BaseComponent {
   @property({ type: Number })
   score: number = 0;
 
@@ -32,6 +32,6 @@ export class ScoreComponent extends BaseComponent {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "x-score": ScoreComponent;
+    "x-game-score": GameScoreComponent;
   }
 }

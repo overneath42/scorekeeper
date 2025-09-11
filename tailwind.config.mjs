@@ -10,6 +10,11 @@ export default {
         sans: ["Rethink Sans", "sans-serif"],
         cursive: ["Homemade Apple", "cursive"],
       },
+      spacing: {
+        sm: "0.5rem",
+        md: "1rem",
+        lg: "1.5rem",
+      },
       colors: {
         primary: {
           DEFAULT: "#2563EB", // Blue-600

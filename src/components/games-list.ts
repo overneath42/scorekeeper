@@ -1,18 +1,18 @@
 import { html } from "lit";
 import { consume } from "@lit/context";
 import { customElement, property } from "lit/decorators.js";
-import { BaseComponent, Game, GameStore, gameStoreContext } from "../utils";
+import { BaseComponent, Game } from "@/utils";
+
+import { gameListContext, type GameListContext } from "@/context";
 
 @customElement("x-games-list")
 export class GamesListComponent extends BaseComponent {
-  @consume({ context: gameStoreContext, subscribe: true })
+  @consume({ context: gameListContext, subscribe: true })
   @property({ attribute: false })
-  gameStore?: GameStore;
+  gameList?: GameListContext;
 
   private selectGame(game: Game) {
-    if (this.gameStore) {
-      this.gameStore.setActiveGame(game);
-    }
+    // this.gameList?.setActiveGame(game);
 
     // Navigate to game detail view
     window.location.href = "game-detail.html";
@@ -57,11 +57,11 @@ export class GamesListComponent extends BaseComponent {
   }
 
   render() {
-    if (!this.gameStore) {
+    if (!this.gameList) {
       return html`<div class="text-center text-gray-500">Loading games...</div>`;
     }
 
-    const games = this.gameStore.getGamesList();
+    const games = this.gameList.getGamesList();
 
     if (games.length === 0) {
       return html`

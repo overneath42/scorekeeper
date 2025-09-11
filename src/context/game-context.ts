@@ -1,7 +1,9 @@
 import { createContext } from "@lit/context";
-import type { Game } from "../../types/index.js";
+import type { Game } from "@/types/index.js";
+import { StoredGame } from "@/services";
 
-export interface GameContext extends Game {
+export interface GameContext extends StoredGame {
+  createNewGame: (name: string, targetScore: number, players: string[]) => void;
   addScore: (playerIndex: number, score: number) => void;
   updateGame: (game: Game) => void;
   getPlayerScoringHistory: (playerIndex: number) => number[];

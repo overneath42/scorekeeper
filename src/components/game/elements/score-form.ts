@@ -3,12 +3,11 @@ import classNames from "classnames";
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { createRef, ref, Ref } from "lit/directives/ref.js";
-import type { GameContext } from "../utils/context/game-context.js";
-import { gameContext } from "../utils/context/game-context.js";
-import { BaseComponent, safeCall } from "../utils/index.js";
+import { gameContext, type GameContext } from "@/context";
+import { BaseComponent, safeCall } from "@/utils";
 
-@customElement("x-score-form")
-export class ScoreFormComponent extends BaseComponent {
+@customElement("x-game-score-form")
+export class GameScoreFormComponent extends BaseComponent {
   @consume({ context: gameContext, subscribe: true })
   game?: GameContext;
 
@@ -99,7 +98,9 @@ export class ScoreFormComponent extends BaseComponent {
   private emitFormHeight() {
     const wrapper = this.querySelector("[data-score-form-wrapper]") as HTMLElement;
     if (wrapper) {
-      const height = wrapper.offsetHeight;
+      console.dir(wrapper);
+      const height = wrapper.clientHeight;
+      // const height = wrapper.offsetHeight;
       this.dispatchEvent(
         new CustomEvent("form-height-updated", {
           detail: { height },
@@ -192,6 +193,6 @@ export class ScoreFormComponent extends BaseComponent {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "x-score-form": ScoreFormComponent;
+    "x-game-score-form": GameScoreFormComponent;
   }
 }

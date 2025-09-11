@@ -1,6 +1,6 @@
 export * from "./base-component.js";
-export * from "./game-store.js";
+export * from "./storage-adapters.js";
 export * from "./safe-call.js";
-export * from "./store-subscriber.js";
-export * from "./template-loader.js";
 
+// Re-export types from other modules
+export * from "../types/index.js";

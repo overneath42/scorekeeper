@@ -35,6 +35,7 @@
     "@hotwired/stimulus": "^3.2.2",
     "@lit/context": "^1.1.6",
     "classnames": "^2.5.1",
+    "date-fns": "^4.1.0",
     "stimulus-library": "^1.4.0"
   }
 }
