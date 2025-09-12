@@ -14,6 +14,9 @@ export class GamePlayerNameComponent extends BaseComponent {
   playerIndex: number = 0;
 
   get playerName() {
+    if (this.playerIndex < 0) return "Unknown Player";
+    if (this.playerIndex >= (this.game?.players.length || 0)) return "Unknown Player";
+
     return this.game?.players[this.playerIndex]?.name || `Player ${this.playerIndex + 1}`;
   }
 

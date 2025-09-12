@@ -166,7 +166,10 @@ export class GameStorageService {
 
     return {
       ...game,
-      id: gameId || `game_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      id: gameId || generateUUID(),
+      timecode:
+        existingGame?.timecode ||
+        `game_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       createdAt: existingGame?.createdAt || now,
       updatedAt: now,
       status: existingGame?.status || "active",

@@ -71,6 +71,16 @@ export class GameProviderComponent extends BaseComponent {
     return this.getCurrentWinner().some((player) => player.index === playerIndex);
   };
 
+  /**
+   * Loads a stored game into the current game state, attaching relevant game methods to the loaded object.
+   *
+   * @param storedGame - The game data to load, typically retrieved from storage.
+   *
+   * This method sets the `game` property to the loaded game data and binds core game manipulation methods
+   * (such as creating a new game, updating the game, adding scores, retrieving player scoring history and current score,
+   * checking for the current winner, and loading a game by ID) to the loaded game object. After updating the game state,
+   * it triggers a UI update by calling `requestUpdate()`.
+   */
   private loadGame = (storedGame: StoredGame) => {
     this.game = {
       ...storedGame,
@@ -85,6 +95,14 @@ export class GameProviderComponent extends BaseComponent {
     this.requestUpdate();
   };
 
+  /**
+   * Loads a game by its unique identifier.
+   *
+   * Retrieves the stored game data associated with the provided `gameId` from storage.
+   * If the game exists, sets the current game ID and loads the game into the application state.
+   *
+   * @param gameId - The unique identifier of the game to load.
+   */
   loadGameById = (gameId: string) => {
     const storedGame = this.storage.getStoredGame(gameId);
     if (storedGame) {

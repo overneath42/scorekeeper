@@ -38,7 +38,7 @@ export default {
         },
         warning: {
           DEFAULT: "#F59E0B", // Amber-500
-          light: "#FBBF24", // Amber-400
+          light: "#fef3c7", // Amber-100
           dark: "#D97706", // Amber-600
         },
         error: {

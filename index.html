@@ -3,9 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scorekeeper Home</title>
+    <title>Scorekeeper</title>
   </head>
-  <body>
+  <body class="h-screen overflow-hidden">
+    <x-game-list-provider>
+      <main class="h-full flex flex-col container mx-auto relative">
+        <header class="p-4">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Scorekeeper</h1>
+          <p class="text-gray-600">Select a game to start playing, or make a new game.</p>
+        </header>
+
+        <div class="flex-1 overflow-auto border-t border-b">
+          <x-games-list></x-games-list>
+        </div>
+        <footer>
+          <div class="p-4 bg-gray-50">
+            <a href="new.html" class="btn btn-primary w-full">New Game</a>
+          </div>
+        </footer>
+      </main>
+    </x-game-list-provider>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
