@@ -7,6 +7,9 @@ export class GameDetailPlayerListComponent extends BaseComponent {
   @property({ type: Array })
   players: string[] = ["Player 1", "Player 2"];
 
+  @property({ type: Boolean, attribute: "disable-editing" })
+  disableEditing: boolean = false;
+
   private addPlayer() {
     const newPlayerNumber = this.players.length + 1;
     this.players = [...this.players, `Player ${newPlayerNumber}`];
@@ -58,7 +61,7 @@ export class GameDetailPlayerListComponent extends BaseComponent {
                     this.updatePlayerName(index, (e.target as HTMLInputElement).value)}"
                   class="flex-1 form-input"
                   placeholder="Player name" />
-                ${this.players.length > 2
+                ${this.players.length > 2 && !this.disableEditing
                   ? html`
                       <button
                         type="button"
@@ -73,9 +76,15 @@ export class GameDetailPlayerListComponent extends BaseComponent {
             `
           )}
         </ol>
-        <button type="button" @click="${this.addPlayer}" class="btn-sm btn-primary-outline">
-          + Add Player
-        </button>
+        ${!this.disableEditing
+          ? html`
+              <button type="button" @click="${this.addPlayer}" class="btn-sm btn-primary-outline">
+                + Add Player
+              </button>
+            `
+          : html`<p class="py-sm px-md rounded bg-warning-light text-sm text-warning-dark">
+              Players cannot be added after scoring has begun.
+            </p>`}
       </div>
     `;
   }

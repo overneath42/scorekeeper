@@ -13,6 +13,7 @@ import "./components/game/elements/score.js";
 import "./components/game/elements/player-name.js";
 
 import "./components/game-detail/form.js";
+import "./components/game-detail/header.js";
 import "./components/game-detail/player-list.js";
 
 import "./components/games-list.js";

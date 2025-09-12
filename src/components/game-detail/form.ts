@@ -3,7 +3,7 @@ import { consume } from "@lit/context";
 import { customElement, property, state } from "lit/decorators.js";
 import { BaseComponent } from "@/utils";
 import { gameListContext, type GameListContext } from "@/context";
-import { GameStorageService } from "@/services";
+import { GameStorageService, StoredGame } from "@/services";
 
 type GameFormContext = "create" | "edit";
 
@@ -12,6 +12,10 @@ export class GameDetailFormComponent extends BaseComponent {
   @consume({ context: gameListContext, subscribe: true })
   @property({ attribute: false })
   gameList?: GameListContext;
+
+  @property({ type: Object })
+  @state()
+  game: StoredGame | null = null;
 
   @property({ type: Array })
   @state()
@@ -34,6 +38,10 @@ export class GameDetailFormComponent extends BaseComponent {
     return this.context === "edit";
   }
 
+  get canChangePlayers() {
+    return (this.game?.scoringHistory ?? []).length === 0;
+  }
+
   connectedCallback() {
     super.connectedCallback();
     if (this.context === "edit") {
@@ -48,6 +56,7 @@ export class GameDetailFormComponent extends BaseComponent {
       const storedGame = this.storage.getStoredGame(id);
 
       if (storedGame) {
+        this.game = storedGame;
         this.gameName = storedGame.name;
         this.targetScore = storedGame.targetScore;
         this.players = storedGame.players.map((player) => player.name);
@@ -171,6 +180,7 @@ export class GameDetailFormComponent extends BaseComponent {
           <!-- Players Field -->
           <x-game-detail-player-list
             .players="${this.players}"
+            ?disable-editing="${!this.canChangePlayers}"
             @players-changed="${this.handlePlayersChanged}"></x-game-detail-player-list>
         </div>
 

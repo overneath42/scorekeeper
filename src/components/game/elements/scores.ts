@@ -3,7 +3,7 @@ import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 import { gameContext, type GameContext } from "@/context";
-import { BaseComponent, safeCall } from "@/utils";
+import { BaseComponent } from "@/utils";
 
 @customElement("x-game-scores")
 export class GameScoresComponent extends BaseComponent {
@@ -17,13 +17,15 @@ export class GameScoresComponent extends BaseComponent {
     if (!this.game) return [];
     if (typeof this.game.getPlayerScoringHistory !== "function") return [];
 
-    return safeCall(this.game.getPlayerScoringHistory, [this.playerIndex], []) ?? [];
+    return this.game.getPlayerScoringHistory(this.playerIndex) ?? [];
   }
 
   render() {
     let runningTotal = 0;
     const scores = this.scores;
     const lastIndex = scores.length - 1;
+
+    console.log("Rendering scores for player index", this.playerIndex, scores);
 
     return html`
       ${repeat(

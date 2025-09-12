@@ -23,6 +23,8 @@ export class GameStorageService {
   private static instance: GameStorageService;
 
   private constructor() {
+    // TODO: eventually it would be great to make this user-configurable, so we can eventually
+    // expose it to other storage backends (IndexedDB, remote API, etc)
     this.storage = new LocalStorageAdapter<StoredGame>("scorekeeper");
   }
 

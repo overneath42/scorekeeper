@@ -31,7 +31,7 @@ export class GameboardComponent extends BaseComponent {
     return `
     --grid-columns: ${gridColumns};
     --player-width: ${playerWidth};
-    --min-width: ${minWidth};
+    /*--min-width: ${minWidth}; */
     --form-height: ${wrapperHeightToUse - 44}px;
     `;
   }

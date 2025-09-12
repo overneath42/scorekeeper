@@ -19,6 +19,8 @@
     grid-template-columns: repeat(var(--grid-columns, 1), minmax(var(--player-width, 100%), 1fr));
     overflow-y: auto;
     scroll-snap-type: y mandatory;
+    overflow-x: hidden;
+    width: calc(var(--grid-columns, 1) * (100vw / var(--grid-columns, 1)));
   }
 
   .player-score-list .score-list-item {
