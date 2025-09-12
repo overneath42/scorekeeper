@@ -8,12 +8,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "index.html",
-        about: "about.html",
-        contact: "contact.html",
-        games: "games.html",
-        play: "play.html",
-        new: "new.html",
-        edit: "edit.html",
+        play: "pages/play.html",
+        new: "pages/new.html",
+        edit: "pages/edit.html",
       },
     },
     copyPublicDir: true,

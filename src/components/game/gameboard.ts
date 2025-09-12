@@ -2,10 +2,9 @@ import { consume } from "@lit/context";
 import classNames from "classnames";
 import { html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { BaseComponent, safeCall } from "@/utils/index.js";
+import { BaseComponent } from "@/utils/index.js";
 import { type GameContext, gameContext } from "@/context";
 import { GameStorageService } from "@/services";
-import { createRef, ref, Ref } from "lit/directives/ref.js";
 
 @customElement("x-gameboard")
 export class GameboardComponent extends BaseComponent {
@@ -18,20 +17,16 @@ export class GameboardComponent extends BaseComponent {
   @property({ type: Number })
   wrapperHeight = 0;
 
-  wrapperRef: Ref<HTMLDivElement> = createRef();
   storage = GameStorageService.getInstance();
 
   private get variableStyles() {
     const gridColumns = this.players.length;
     const playerWidth = this.playerWidth;
-    const minWidth =
-      this.players.length > this.maxPlayersPerView ? `${this.players.length * 33.333}%` : "100%";
     const wrapperHeightToUse = this.wrapperHeight || 44; // Fallback to 44px
 
     return `
     --grid-columns: ${gridColumns};
     --player-width: ${playerWidth};
-    /*--min-width: ${minWidth}; */
     --form-height: ${wrapperHeightToUse - 44}px;
     `;
   }
@@ -82,14 +77,18 @@ export class GameboardComponent extends BaseComponent {
         <div class="flex items-center justify-center h-full text-gray-500">
           <div class="text-center space-y-md">
             <p class="mb-sm font-semibold">No active game</p>
-            <a href="new.html" class="btn btn-primary">Start a New Game</a>
+            <a href="/pages/new.html" class="btn btn-primary">Start a New Game</a>
           </div>
         </div>
       `;
     }
 
     return html`
-      <div class="overflow-x-auto overflow-y-hidden snap-x h-[calc(100%-44px)]">
+      <div
+        class="${classNames("overflow-x-auto overflow-y-hidden snap-x", {
+          "h-[calc(100%-44px)]": this.game?.status === "active",
+          "h-full": this.game?.status !== "active",
+        })}">
         <div class="game-detail-grid" style=${this.variableStyles}>
           <!-- Player Headers (Sticky) -->
           ${this.players.map(
@@ -121,21 +120,16 @@ export class GameboardComponent extends BaseComponent {
           ${this.players.map(
             (player, index) => html`
               <div
-                class="${classNames("player-current-score p-2 border-t flex gap-4 items-baseline", {
+                class="${classNames("", {
                   "border-r": index < this.players.length - 1,
-                })} ">
-                ${this.game?.isCurrentWinner(player.index)
-                  ? html`<span class="text-success font-bold" title="Current Leader">Leader</span>`
-                  : nothing}
-                <span class="text-3xl font-semibold text-gray-dark ml-auto"
-                  >${safeCall(this.game?.getPlayerCurrentScore, [player.index]) ?? 0}</span
-                >
+                })}">
+                <x-current-score player-index="${player.index}"></x-current-score>
               </div>
             `
           )}
         </div>
       </div>
-      <x-game-score-form></x-game-score-form>
+      ${this.game?.status === "active" ? html`<x-game-score-form></x-game-score-form>` : nothing}
     `;
   }
 }

@@ -18,13 +18,31 @@ export class GameHeaderComponent extends BaseComponent {
   }
 
   get startedOn() {
-    if (!this.game || !this.game.createdAt) return "";
+    if (!this.game || !this.game.createdAt || !this.game.updatedAt) return "";
 
-    const dateString = new Date(this.game.createdAt).toLocaleDateString(undefined, {
+    let date;
+
+    switch (this.game.status) {
+      case "active":
+        date = this.game.createdAt;
+        break;
+      case "completed":
+        date = this.game.updatedAt;
+        break;
+      default:
+        date = this.game.createdAt;
+        break;
+    }
+
+    const dateString = new Date(date).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
+
+    if (this.game.status === "completed") {
+      return `Completed on ${dateString}`;
+    }
 
     return `Started on ${dateString}`;
   }

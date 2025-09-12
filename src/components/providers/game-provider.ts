@@ -32,7 +32,25 @@ export class GameProviderComponent extends BaseComponent {
     if (this.currentGameId) {
       this.storage.addScore(this.currentGameId, playerIndex, score);
       const updatedGame = this.storage.getStoredGame(this.currentGameId);
+
       if (updatedGame) {
+        // Check if game should be completed based on target score
+        if (updatedGame.targetScore && updatedGame.status === "active") {
+          const playerScores = this.storage.calculatePlayerScores(updatedGame);
+          const hasWinner = playerScores.some(
+            (playerScore) => playerScore >= updatedGame.targetScore!
+          );
+
+          if (hasWinner) {
+            this.storage.updateGameStatus(this.currentGameId, "completed");
+            const finalGame = this.storage.getStoredGame(this.currentGameId);
+            if (finalGame) {
+              this.loadGame(finalGame);
+              return;
+            }
+          }
+        }
+
         this.loadGame(updatedGame);
       }
     }

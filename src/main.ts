@@ -11,12 +11,14 @@ import "./components/game/elements/header.js";
 import "./components/game/elements/scores.js";
 import "./components/game/elements/score.js";
 import "./components/game/elements/player-name.js";
+import "./components/game/elements/current-score.js";
 
 import "./components/game-detail/form.js";
 import "./components/game-detail/header.js";
 import "./components/game-detail/player-list.js";
 
 import "./components/games-list.js";
+import "./components/game-list/game.js";
 
 const application = Application.start();
 

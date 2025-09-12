@@ -131,7 +131,7 @@ export class GameDetailFormComponent extends BaseComponent {
   }
 
   private redirectToGameboard(gameId: string) {
-    const url = new URL("play.html", window.location.href);
+    const url = new URL("pages/play.html", window.location.href);
     url.searchParams.set("id", gameId);
     window.location.href = url.toString();
   }

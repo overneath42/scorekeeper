@@ -24,7 +24,7 @@ export class GameDetailHeaderComponent extends BaseComponent {
   }
 
   private get backButtonHref() {
-    return this.isEditMode && this.gameId ? `/play.html?id=${this.gameId}` : "/";
+    return this.isEditMode && this.gameId ? `/pages/play.html?id=${this.gameId}` : "/";
   }
 
   render() {

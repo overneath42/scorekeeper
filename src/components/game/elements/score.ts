@@ -4,10 +4,10 @@ import { BaseComponent } from "@/utils/index.js";
 
 @customElement("x-game-score")
 export class GameScoreComponent extends BaseComponent {
-  @property({ type: Number, attribute: 'score' })
+  @property({ type: Number, attribute: "score" })
   score: number = 0;
 
-  @property({ type: Number, attribute: 'increment' })
+  @property({ type: Number, attribute: "increment" })
   increment?: number;
 
   @property({ type: Boolean, attribute: "is-current-score" })

@@ -15,28 +15,31 @@ export class GameListProviderComponent extends BaseComponent {
 
   private addGame = (game: StoredGame) => {
     this.storage.saveGame(game);
+    this.gameList.games = this.storage.getAllStoredGames();
     this.requestUpdate();
   };
 
   private removeGame = (id: string) => {
     this.storage.deleteGame(id);
+    this.gameList.games = this.storage.getAllStoredGames();
     this.requestUpdate();
   };
 
   private updateGame = (updatedGame: StoredGame) => {
     this.storage.saveGame(updatedGame);
+    this.gameList.games = this.storage.getAllStoredGames();
     this.requestUpdate();
   };
 
   private clearGames = () => {
     this.storage.clearAllGames();
+    this.gameList.games = this.storage.getAllStoredGames();
     this.requestUpdate();
   };
 
   connectedCallback() {
     super.connectedCallback();
     this.gameList.games = this.storage.getAllStoredGames();
-    console.log("Loaded games:", this.gameList.games);
   }
 
   @provide({ context: gameListContext })
