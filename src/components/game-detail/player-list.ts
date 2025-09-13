@@ -5,7 +5,7 @@ import { BaseComponent } from "@/utils";
 @customElement("x-game-detail-player-list")
 export class GameDetailPlayerListComponent extends BaseComponent {
   @property({ type: Array })
-  players: string[] = ["Player 1", "Player 2"];
+  players: string[] = ["Player 1"];
 
   @property({ type: Boolean, attribute: "disable-editing" })
   disableEditing: boolean = false;
@@ -49,7 +49,8 @@ export class GameDetailPlayerListComponent extends BaseComponent {
     return html`
       <div class="space-y-md">
         <label class="block form-label">Players</label>
-        <ol class="space-y-sm">
+        <p class="form-help-text">At least one player is required!</p>
+        <ol class="flex flex-col gap-md mb-md">
           ${this.players.map(
             (player, index) => html`
               <li class="flex items-center gap-2">

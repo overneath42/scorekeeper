@@ -29,9 +29,9 @@ export class GameDetailHeaderComponent extends BaseComponent {
 
   render() {
     return html`
-      <header class="flex-shrink-0 py-6 px-4 flex flex-col-reverse gap-2">
+      <header class="flex-shrink-0 pt-safe-area-top pb-md px-md flex flex-col-reverse gap-2">
         <h1 id="page-title" class="text-4xl font-bold text-gray-900">${this.pageTitle}</h1>
-        <a href="${this.backButtonHref}" class="btn-sm btn-secondary mb-2 self-start"
+        <a href="${this.backButtonHref}" class="btn-sm btn-secondary mb-sm self-start"
           >&larr; ${this.backButtonLabel}</a
         >
       </header>

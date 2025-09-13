@@ -10,11 +10,14 @@ export default {
         sans: ["Rethink Sans", "sans-serif"],
         cursive: ["Homemade Apple", "cursive"],
       },
-      spacing: {
+      spacing: ({ theme }) => ({
         sm: "0.5rem",
         md: "1rem",
         lg: "1.5rem",
-      },
+        "device-height": "100dvh",
+        "safe-area-top": `max(env(safe-area-inset-top), 1rem)`,
+        "safe-area-bottom": `max(env(safe-area-inset-bottom), 1rem)`,
+      }),
       colors: {
         primary: {
           DEFAULT: "#2563EB", // Blue-600

@@ -5,6 +5,7 @@ import { customElement, property } from "lit/decorators.js";
 import { createRef, ref, Ref } from "lit/directives/ref.js";
 import { gameContext, type GameContext } from "@/context";
 import { BaseComponent } from "@/utils";
+import { BUTTON_HEIGHT, BUTTON_WRAPPER_HEIGHT } from "@/constants";
 
 @customElement("x-game-score-form")
 export class GameScoreFormComponent extends BaseComponent {
@@ -67,7 +68,7 @@ export class GameScoreFormComponent extends BaseComponent {
 
     form?.style.setProperty(
       "transform",
-      isVisible ? "translateY(calc(-100% + 44px))" : "translateY(0)"
+      isVisible ? `translateY(calc(-100% + ${BUTTON_WRAPPER_HEIGHT}px))` : "translateY(0)"
     );
 
     button.style.opacity = isVisible ? "0" : "1";
@@ -85,12 +86,16 @@ export class GameScoreFormComponent extends BaseComponent {
   render() {
     return html`
       <div
-        class="border-t-2 absolute top-[calc(100%-44px)] left-0 w-full bg-white transition-transform flex flex-col px-3"
+        class="border-t-2 absolute left-0 w-full bg-white transition-transform flex flex-col px-3 pb-md"
+        style="top: calc(100% - ${BUTTON_WRAPPER_HEIGHT}px);"
         data-score-form-wrapper>
-        <div class="h-[44px] flex items-center justify-center relative">
+        <div
+          class="flex items-center justify-center relative"
+          style="padding: ${BUTTON_WRAPPER_HEIGHT -
+          BUTTON_HEIGHT}px 0; height: ${BUTTON_WRAPPER_HEIGHT}px;">
           <button
             type="button"
-            class="btn-sm btn-primary w-full transition-opacity toggle-form"
+            class="btn btn-primary w-full h-[${BUTTON_HEIGHT}px] transition-opacity toggle-form"
             data-form-toggle
             @click=${() => this.toggleFormVisibility(true)}>
             Update Score

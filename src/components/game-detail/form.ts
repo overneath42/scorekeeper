@@ -19,7 +19,7 @@ export class GameDetailFormComponent extends BaseComponent {
 
   @property({ type: Array })
   @state()
-  players: string[] = ["Player 1", "Player 2"];
+  players: string[] = ["Player 1"];
 
   @property({ type: String })
   @state()
@@ -147,8 +147,8 @@ export class GameDetailFormComponent extends BaseComponent {
 
   render() {
     return html`
-      <form @submit="${this.handleSubmit}" class="h-full flex flex-col gap-4">
-        <div class="px-md">
+      <form @submit="${this.handleSubmit}" class="h-full overflow-hidden flex flex-col gap-md">
+        <div class="px-md flex-1 overflow-y-auto">
           <!-- Game Name Field -->
           <div class="form-group">
             <label for="game-name" class="form-label"> Game Name </label>

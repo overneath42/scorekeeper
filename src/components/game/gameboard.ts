@@ -5,6 +5,7 @@ import { customElement, property } from "lit/decorators.js";
 import { BaseComponent } from "@/utils/index.js";
 import { type GameContext, gameContext } from "@/context";
 import { GameStorageService } from "@/services";
+import { BUTTON_HEIGHT, BUTTON_WRAPPER_HEIGHT } from "@/constants";
 
 @customElement("x-gameboard")
 export class GameboardComponent extends BaseComponent {
@@ -22,12 +23,10 @@ export class GameboardComponent extends BaseComponent {
   private get variableStyles() {
     const gridColumns = this.players.length;
     const playerWidth = this.playerWidth;
-    const wrapperHeightToUse = this.wrapperHeight || 44; // Fallback to 44px
 
     return `
     --grid-columns: ${gridColumns};
     --player-width: ${playerWidth};
-    --form-height: ${wrapperHeightToUse - 44}px;
     `;
   }
 
@@ -85,10 +84,10 @@ export class GameboardComponent extends BaseComponent {
 
     return html`
       <div
-        class="${classNames("overflow-x-auto overflow-y-hidden snap-x", {
-          "h-[calc(100%-44px)]": this.game?.status === "active",
-          "h-full": this.game?.status !== "active",
-        })}">
+        class="overflow-x-auto overflow-y-hidden snap-x"
+        style="height: calc(100% - ${this.game?.status === "active"
+          ? `${BUTTON_WRAPPER_HEIGHT}px`
+          : "0px"});">
         <div class="game-detail-grid" style=${this.variableStyles}>
           <!-- Player Headers (Sticky) -->
           ${this.players.map(

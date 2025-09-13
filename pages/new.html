@@ -2,12 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>New Game - Scorekeeper</title>
   </head>
-  <body class="h-screen overflow-hidden">
+  <body class="overflow-hidden h-device-height">
     <x-game-list-provider>
-      <main class="h-full flex flex-col container mx-auto max-w-2xl gap-md">
+      <main class="h-device-height flex flex-col container mx-auto max-w-2xl gap-md">
         <x-game-detail-header context="create"></x-game-detail-header>
 
         <div class="flex-1 overflow-auto">
