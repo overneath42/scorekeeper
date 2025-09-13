@@ -43,10 +43,6 @@ jobs:
             DEPLOY_DIR="/var/www/scorekeeper/releases/$(date +%Y%m%d_%H%M%S)"
             mkdir -p $DEPLOY_DIR
 
-            # Set ownership for web directory
-            sudo chown -R ${{ secrets.SERVER_USER }}:www-data /var/www/scorekeeper
-            sudo chmod -R 755 /var/www/scorekeeper
-
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -73,12 +69,5 @@ jobs:
             # Update current symlink
             ln -sfn $DEPLOY_DIR /var/www/scorekeeper/current
 
-            # Set proper permissions
-            sudo chown -R ${{ secrets.SERVER_USER }}:www-data /var/www/scorekeeper
-            sudo chmod -R 755 /var/www/scorekeeper
-
             # Keep only last 5 deployments
             cd /var/www/scorekeeper/releases && ls -t | tail -n +6 | xargs rm -rf
-
-            # Restart Apache to ensure any cached content is cleared
-            sudo service apache2 reload
