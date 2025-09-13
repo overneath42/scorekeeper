@@ -5,7 +5,7 @@ import { customElement, property } from "lit/decorators.js";
 import { BaseComponent } from "@/utils/index.js";
 import { type GameContext, gameContext } from "@/context";
 import { GameStorageService } from "@/services";
-import { BUTTON_HEIGHT, BUTTON_WRAPPER_HEIGHT } from "@/constants";
+import { BUTTON_WRAPPER_HEIGHT } from "@/constants";
 
 @customElement("x-gameboard")
 export class GameboardComponent extends BaseComponent {
