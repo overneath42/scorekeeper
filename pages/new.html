@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>New Game - Scorekeeper</title>
   </head>
-  <body class="overflow-hidden h-device-height">
-    <x-game-list-provider>
-      <main class="h-device-height flex flex-col container mx-auto max-w-2xl gap-md">
-        <x-game-detail-header context="create"></x-game-detail-header>
-
-        <div class="flex-1 overflow-auto">
-          <x-game-detail-form></x-game-detail-form>
-        </div>
-      </main>
-    </x-game-list-provider>
+  <body class="overflow-hidden h-device-height" data-barba="wrapper">
+    <main class="h-full" data-barba="container" data-barba-namespace="edit">
+      <x-game-list-provider>
+        <main class="h-device-height flex flex-col container mx-auto max-w-2xl gap-md">
+          <x-game-detail-header context="create"></x-game-detail-header>
+          <div class="flex-1 overflow-auto">
+            <x-game-detail-form></x-game-detail-form>
+          </div>
+        </main>
+      </x-game-list-provider>
+    </main>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

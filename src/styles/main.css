@@ -1,4 +1,4 @@
-@import './variables.css';
+@import './utils.css';
 @import './components/game-detail.css';
 @import './components/game-header.css';
 @import './components/score-list.css';
@@ -10,3 +10,4 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+

@@ -1,5 +1,5 @@
 export * from "./base-component.js";
-export * from "./storage-adapters.js";
+export * from "./storage-adapters/index.js";
 export * from "./safe-call.js";
 
 // Re-export types from other modules

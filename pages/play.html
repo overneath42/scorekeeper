@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Game Detail - Scorekeeper</title>
   </head>
-  <body class="overflow-hidden h-device-height">
-    <x-game-provider>
-      <main class="h-full flex flex-col container mx-auto relative">
-        <x-gameboard class="flex-1"></x-gameboard>
-      </main>
-    </x-game-provider>
+  <body class="overflow-hidden h-device-height" data-barba="wrapper">
+    <main class="h-full" data-barba="container" data-barba-namespace="play">
+      <x-game-provider>
+        <div class="h-full flex flex-col container mx-auto relative">
+          <x-gameboard class="flex-1"></x-gameboard>
+        </div>
+      </x-game-provider>
+    </main>
 
     <script type="module" src="/src/main.ts"></script>
   </body>
