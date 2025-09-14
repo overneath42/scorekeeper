@@ -1,29 +1,28 @@
-import { html, LitElement } from "lit";
+import { html } from "lit";
+import barba from "@barba/core";
 import { customElement, property } from "lit/decorators.js";
-import { Game } from "@/utils";
+import { BaseComponent, Game } from "@/utils";
 import { type StoredGame } from "@/services";
 
 @customElement("x-game-list-game")
-export class GameListGameComponent extends LitElement {
+export class GameListGameComponent extends BaseComponent {
   @property({ type: Object })
   game?: StoredGame;
 
-  createRenderRoot() {
-    return this;
-  }
-
   private selectGame() {
-    window.location.href = `/pages/play.html?id=${this.game?.id}`;
+    barba.go(`/pages/play.html?id=${this.game?.id}`);
   }
 
   private deleteGame(event: Event) {
     event.stopPropagation();
 
     if (this.game && confirm(`Are you sure you want to delete "${this.game.name}"?`)) {
-      this.dispatchEvent(new CustomEvent('delete-game', {
-        detail: { gameId: this.game.id },
-        bubbles: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent("delete-game", {
+          detail: { gameId: this.game.id },
+          bubbles: true,
+        })
+      );
     }
   }
 

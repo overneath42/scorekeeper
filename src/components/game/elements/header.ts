@@ -3,6 +3,7 @@ import { customElement, property } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import { BaseComponent } from "@/utils/index.js";
 import { gameContext, type GameContext } from "@/context";
+import barba from "@barba/core";
 
 @customElement("x-game-header")
 export class GameHeaderComponent extends BaseComponent {
@@ -52,7 +53,7 @@ export class GameHeaderComponent extends BaseComponent {
     if (this.game && this.game.id) {
       url.searchParams.set("id", this.game.id);
     }
-    window.location.href = url.toString();
+    barba.go(url.toString());
   }
 
   render() {

@@ -5,22 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Scorekeeper</title>
   </head>
-  <body class="overflow-hidden h-device-height">
-    <x-game-list-provider>
-      <main class="flex flex-col container mx-auto relative h-device-height">
-        <header class="px-md pt-safe-area-top pb-md">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Scorekeeper</h1>
-          <p class="text-gray-600">Select a game to start playing, or make a new game.</p>
-        </header>
+  <body class="overflow-hidden h-device-height" data-barba="wrapper">
+    <main
+      class="container mx-auto relative h-device-height origin-left"
+      data-barba="container"
+      data-barba-namespace="index">
+      <x-game-list-provider>
+        <div class="h-full flex flex-col">
+          <header class="px-md pt-safe-area-top pb-md">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Scorekeeper</h1>
+            <p class="text-gray-600">Select a game to start playing, or make a new game.</p>
+          </header>
 
-        <div class="flex-1 overflow-auto border-t border-b">
-          <x-games-list></x-games-list>
+          <div class="flex-1 overflow-auto border-t border-b">
+            <x-games-list></x-games-list>
+          </div>
+          <footer class="p-md bg-gray-100 pb-safe-area-bottom">
+            <a href="/pages/new.html" class="btn btn-primary w-full">New Game</a>
+          </footer>
         </div>
-        <footer class="p-md bg-gray-100 pb-safe-area-bottom">
-          <a href="/pages/new.html" class="btn btn-primary w-full">New Game</a>
-        </footer>
-      </main>
-    </x-game-list-provider>
+      </x-game-list-provider>
+    </main>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

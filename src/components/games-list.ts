@@ -1,18 +1,15 @@
-import { html, LitElement } from "lit";
+import { html } from "lit";
 import { consume } from "@lit/context";
 import { customElement, property } from "lit/decorators.js";
 
 import { gameListContext, type GameListContext } from "@/context";
+import { BaseComponent } from "@/utils";
 
 @customElement("x-games-list")
-export class GamesListComponent extends LitElement {
+export class GamesListComponent extends BaseComponent {
   @consume({ context: gameListContext, subscribe: true })
   @property({ attribute: false })
   gameList?: GameListContext;
-
-  createRenderRoot() {
-    return this;
-  }
 
   private handleDeleteGame(event: CustomEvent) {
     const gameId = event.detail.gameId;

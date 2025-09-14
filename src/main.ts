@@ -20,6 +20,9 @@ import "./components/game-detail/player-list.js";
 import "./components/games-list.js";
 import "./components/game-list/game.js";
 
-const application = Application.start();
+import { initBarba } from "./barba-init.js";
 
+const application = Application.start();
 window.Stimulus = application;
+
+initBarba();

@@ -4,6 +4,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { BaseComponent } from "@/utils";
 import { gameListContext, type GameListContext } from "@/context";
 import { GameStorageService, StoredGame } from "@/services";
+import barba from "@barba/core";
 
 type GameFormContext = "create" | "edit";
 
@@ -131,9 +132,9 @@ export class GameDetailFormComponent extends BaseComponent {
   }
 
   private redirectToGameboard(gameId: string) {
-    const url = new URL("pages/play.html", window.location.href);
+    const url = new URL("/pages/play.html", window.location.href);
     url.searchParams.set("id", gameId);
-    window.location.href = url.toString();
+    barba.go(url.toString());
   }
 
   private get formIsValid(): boolean {

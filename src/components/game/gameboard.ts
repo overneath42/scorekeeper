@@ -30,9 +30,14 @@ export class GameboardComponent extends BaseComponent {
     `;
   }
 
+  private gameLoaded = false;
+
   connectedCallback(): void {
     super.connectedCallback();
-    this.handleSetGame();
+    if (!this.gameLoaded && this.game && typeof this.game.loadGameById === "function") {
+      this.handleSetGame();
+      this.gameLoaded = true;
+    }
   }
 
   private handleSetGame() {
