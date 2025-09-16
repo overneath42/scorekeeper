@@ -107,7 +107,7 @@ export class GameScoreFormComponent extends BaseComponent {
           </p>
         </div>
         <form class="grid grid-cols-6 gap-x-6" @submit=${this.handleSubmit} ${ref(this.formRef)}>
-          <ul class="player-list border rounded-sm h-min col-start-1 col-span-3">
+          <ul class="player-list border rounded-xs h-min col-start-1 col-span-3">
             ${this.players.map(
               ({ name, index }) => html`
                 <li
@@ -129,7 +129,7 @@ export class GameScoreFormComponent extends BaseComponent {
             )}
           </ul>
           <div class="col-start-4 col-span-3">
-            <div class="p-3 rounded bg-gray-100 text-sm text-gray-700 flex flex-col gap-y-3 mb-3">
+            <div class="p-3 rounded-sm bg-gray-100 text-sm text-gray-700 flex flex-col gap-y-3 mb-3">
               <input
                 type="number"
                 class="form-input"

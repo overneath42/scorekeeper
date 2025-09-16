@@ -1,17 +1,33 @@
-@layer components {
-  .x-game-header {
-    @apply grid grid-cols-2 grid-rows-2 border-b-2 p-2 gap-y-2 flex-shrink-0 bg-gray-50;
-  }
+@utility x-game-header {
+  @apply grid grid-cols-2 grid-rows-2 border-b-2 p-2 gap-y-2 flex-shrink-0 bg-gray-50;
 
-  .x-game-header .back-link {
+  & .back-link {
     @apply col-start-1 row-start-1 self-baseline justify-self-start;
   }
 
-  .x-game-header .edit-button {
+  & .edit-button {
     @apply col-start-2 row-start-1 self-baseline justify-self-end;
   }
 
-  .x-game-header .title {
+  & .title {
+    @apply row-start-2 col-span-2 text-center text-3xl font-semibold;
+  }
+}
+
+@utility back-link {
+  .x-game-header & {
+    @apply col-start-1 row-start-1 self-baseline justify-self-start;
+  }
+}
+
+@utility edit-button {
+  .x-game-header & {
+    @apply col-start-2 row-start-1 self-baseline justify-self-end;
+  }
+}
+
+@utility title {
+  .x-game-header & {
     @apply row-start-2 col-span-2 text-center text-3xl font-semibold;
   }
 }

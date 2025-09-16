@@ -1,25 +1,27 @@
-@layer utilities {
-  .form-group {
-    @apply mb-4;
-  }
+@utility form-group {
+  @apply mb-4;
+}
 
-  .form-label {
-    @apply block text-lg font-semibold text-gray mb-1;
-  }
+@utility form-label {
+  @apply block text-lg font-semibold text-gray mb-1;
+}
 
-  .form-input {
-    @apply block w-full border text-base border-gray-300 rounded-md shadow-sm px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary;
-  }
+@utility form-input {
+  @apply block w-full border text-base border-gray-300 rounded-md shadow-xs px-3 py-2 placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary focus:border-primary;
 
-  .form-input:disabled {
+  &:disabled {
     @apply bg-gray-100 cursor-not-allowed;
   }
 
-  .form-help-text {
-    @apply text-xs text-gray-500;
+  & + .form-help-text {
+    @apply mt-sm;
   }
+}
 
-  .form-input  + .form-help-text {
+@utility form-help-text {
+  @apply text-xs text-gray-500;
+
+  .form-input + & {
     @apply mt-sm;
   }
 }

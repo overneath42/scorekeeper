@@ -1,21 +1,41 @@
-@layer components {
-  .x-score {
-    @apply flex flex-row-reverse justify-between items-baseline gap-2 px-2;
-  }
+@utility x-score {
+  @apply flex flex-row-reverse justify-between items-baseline gap-2 px-2;
 
-  .x-score:not(:first-child) {
+  &:not(:first-child) {
     @apply items-baseline border-t border-dashed;
   }
 
-  .x-score .total-score {
+  & .total-score {
     @apply text-xl font-semibold;
   }
 
-  .x-score .total-score.current-score {
+  & .total-score.current-score {
     @apply text-4xl font-semibold;
   }
 
-  .x-score .increment {
+  & .increment {
+    @apply text-base italic;
+  }
+}
+
+@utility total-score {
+  .x-score & {
+    @apply text-xl font-semibold;
+  }
+
+  .x-score &.current-score {
+    @apply text-4xl font-semibold;
+  }
+}
+
+@utility current-score {
+  .x-score &.total-score {
+    @apply text-4xl font-semibold;
+  }
+}
+
+@utility increment {
+  .x-score & {
     @apply text-base italic;
   }
 }

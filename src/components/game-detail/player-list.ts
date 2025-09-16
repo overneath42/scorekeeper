@@ -83,7 +83,7 @@ export class GameDetailPlayerListComponent extends BaseComponent {
                 + Add Player
               </button>
             `
-          : html`<p class="py-sm px-md rounded bg-warning-light text-sm text-warning-dark">
+          : html`<p class="py-sm px-md rounded-sm bg-warning-light text-sm text-warning-dark">
               Players cannot be added after scoring has begun.
             </p>`}
       </div>

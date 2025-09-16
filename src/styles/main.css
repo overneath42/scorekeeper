@@ -1,13 +1,67 @@
-@import './utils.css';
+@import './utils.css' layer(base);
 @import './components/game-detail.css';
 @import './components/game-header.css';
 @import './components/score-list.css';
 @import './components/score.css';
-@import './components/score-form.css';
+@import './components/score-form.css' layer(base);
 @import './utilities/buttons.css';
 @import './utilities/forms.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --background-image-natural-paper: url('/src/assets/bg-natural-paper.png');
+
+  --font-sans: Rethink Sans, sans-serif;
+  --font-cursive: Homemade Apple, cursive;
+
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-device-height: 100dvh;
+  --spacing-safe-area-top: max(env(safe-area-inset-top), 1rem);
+  --spacing-safe-area-bottom: max(env(safe-area-inset-bottom), 1rem);
+
+  --color-primary: #2563eb;
+  --color-primary-light: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+
+  --color-secondary: #10b981;
+  --color-secondary-light: #34d399;
+  --color-secondary-dark: #059669;
+
+  --color-gray-light: #f3f4f6;
+  --color-gray: #6b7280;
+  --color-gray-dark: #374151;
+
+  --color-success: #22c55e;
+  --color-success-light: #4ade80;
+  --color-success-dark: #16a34a;
+
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-dark: #d97706;
+
+  --color-error: #ef4444;
+  --color-error-light: #f87171;
+  --color-error-dark: #dc2626;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 

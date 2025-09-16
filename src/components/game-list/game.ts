@@ -69,7 +69,7 @@ export class GameListGameComponent extends BaseComponent {
             <h3 class="font-semibold text-lg text-gray-dark mb-md">${this.game.name}</h3>
 
             <!-- Player Scores List -->
-            <div class="space-y-1 mb-2 w-min min-w-[150px] p-2 bg-blue-100 rounded">
+            <div class="space-y-1 mb-2 w-min min-w-[150px] p-2 bg-blue-100 rounded-sm">
               ${this.getPlayersWithScores(this.game).map(
                 (player) => html`
                   <div
