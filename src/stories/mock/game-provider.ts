@@ -23,6 +23,7 @@ export class MockGameProvider extends LitElement {
       status: "active",
       name: "Story Game",
       targetScore: 100,
+      isTied: false,
       players: [
         { index: 0, name: "Alice" },
         { index: 1, name: "Bob" },

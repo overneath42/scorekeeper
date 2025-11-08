@@ -1,43 +1,67 @@
 import classNames from "classnames";
 import { consume } from "@lit/context";
-import { html, LitElement, nothing } from "lit";
+import { html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { type GameContext, gameContext } from "@/context";
-import { safeCall } from "@/utils/index.js";
+import { BaseComponent, safeCall } from "@/utils/index.js";
 
 @customElement("x-current-score")
-export class CurrentScoreComponent extends LitElement {
+export class CurrentScoreComponent extends BaseComponent {
   @consume({ context: gameContext, subscribe: true })
   @property({ type: Object })
   game?: GameContext;
 
   @property({ type: Number, attribute: "player-index" })
   playerIndex: number = 0;
+  /** Whether this player is currently a winner/leader */
+  private isCurrentWinner(): boolean {
+    return !!this.game?.isCurrentWinner(this.playerIndex);
+  }
 
-  createRenderRoot() {
-    return this;
+  /** Current score for this player */
+  private getCurrentScore(): number {
+    return safeCall(this.game?.getPlayerCurrentScore, [this.playerIndex]) ?? 0;
+  }
+
+  /** Compute the label given pre-computed state */
+  private computeLabel(isWinner: boolean, isTied: boolean, isGameComplete: boolean): string {
+    if (isTied) return "Tied";
+    if (!isWinner) return "";
+    return isGameComplete ? "Winner!" : "Leader";
+  }
+
+  /** Class for the label element */
+  private getWinnerLabelClass(isWinner: boolean, isTied: boolean): string {
+    return classNames("font-bold", {
+      "text-success": isWinner && !isTied,
+      "text-warning": isWinner && isTied,
+    });
+  }
+
+  /** Class for the score element */
+  private getScoreClass(isWinner: boolean): string {
+    return classNames("text-3xl lg:text-5xl font-semibold text-gray-dark ml-auto", {
+      "text-success": isWinner,
+    });
+  }
+
+  /** Render the winner/leader/tied label */
+  private renderLabel(label: string, isWinner: boolean, isTied: boolean) {
+    if (!label) return nothing;
+    return html`<span class="${this.getWinnerLabelClass(isWinner, isTied)}" title="${label}">${label}</span>`;
   }
 
   render() {
-    const isWinner = this.game?.isCurrentWinner(this.playerIndex);
+    const isWinner = this.isCurrentWinner();
+    const isTied = this.game?.isTied ?? false;
     const isGameComplete = this.game?.status === "completed";
-    const currentScore = safeCall(this.game?.getPlayerCurrentScore, [this.playerIndex]) ?? 0;
+    const label = this.computeLabel(isWinner, isTied, isGameComplete);
+    const currentScore = this.getCurrentScore();
 
     return html`
-      <div class="player-current-score p-2 border-t flex gap-4 items-baseline">
-        ${isWinner
-          ? html`<span
-              class="text-success font-bold"
-              title="${isGameComplete ? "Winner!" : "Current Leader"}">
-              ${isGameComplete ? "Winner!" : "Leader"}
-            </span>`
-          : nothing}
-        <span
-          class="${classNames("text-3xl font-semibold text-gray-dark ml-auto", {
-            "text-success": isWinner,
-          })}"
-          >${currentScore}</span
-        >
+      <div class="player-current-score px-sm pt-md pb-lg border-t bg-gray-light flex gap-4 items-baseline">
+        ${this.renderLabel(label, isWinner, isTied)}
+        <span class="${this.getScoreClass(isWinner)}">${currentScore}</span>
       </div>
     `;
   }

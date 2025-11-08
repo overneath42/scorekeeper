@@ -10,6 +10,7 @@ export interface GameContext extends StoredGame {
   getPlayerCurrentScore: (playerIndex: number) => number;
   isCurrentWinner: (playerIndex: number) => boolean;
   loadGameById: (gameId: string) => void;
+  isTied: boolean;
 }
 
 export const gameContext = createContext<GameContext>(Symbol("game-context"));
