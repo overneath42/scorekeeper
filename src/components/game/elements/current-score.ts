@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { consume } from "@lit/context";
 import { html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { createRef, ref, Ref } from "lit/directives/ref.js";
 import { type GameContext, gameContext } from "@/context";
 import { BaseComponent, safeCall } from "@/utils/index.js";
 
@@ -13,6 +14,8 @@ export class CurrentScoreComponent extends BaseComponent {
 
   @property({ type: Number, attribute: "player-index" })
   playerIndex: number = 0;
+
+  scoreRef: Ref<HTMLElement> = createRef();
   /** Whether this player is currently a winner/leader */
   private isCurrentWinner(): boolean {
     return !!this.game?.isCurrentWinner(this.playerIndex);
@@ -40,10 +43,24 @@ export class CurrentScoreComponent extends BaseComponent {
 
   /** Class for the score element */
   private getScoreClass(isWinner: boolean): string {
-    return classNames("text-3xl lg:text-5xl font-semibold text-gray-dark ml-auto", {
+    return classNames("text-3xl lg:text-5xl font-semibold text-gray-dark ml-auto cursor-pointer hover:opacity-75 transition-opacity", {
       "text-success": isWinner,
     });
   }
+
+  /** Handle score click to show popover */
+  private handleScoreClick = () => {
+    if (this.scoreRef.value) {
+      const popover = document.querySelector("x-score-popover") as {
+        playerIndex: number;
+        showScorePopover(targetElement: HTMLElement): void;
+      } | null;
+      if (popover) {
+        popover.playerIndex = this.playerIndex;
+        popover.showScorePopover(this.scoreRef.value);
+      }
+    }
+  };
 
   /** Render the winner/leader/tied label */
   private renderLabel(label: string, isWinner: boolean, isTied: boolean) {
@@ -61,7 +78,12 @@ export class CurrentScoreComponent extends BaseComponent {
     return html`
       <div class="player-current-score px-sm pt-md pb-lg border-t bg-gray-light flex gap-4 items-baseline">
         ${this.renderLabel(label, isWinner, isTied)}
-        <span class="${this.getScoreClass(isWinner)}">${currentScore}</span>
+        <span
+          ${ref(this.scoreRef)}
+          class="${this.getScoreClass(isWinner)}"
+          @click=${this.handleScoreClick}
+          title="Tap to add score"
+        >${currentScore}</span>
       </div>
     `;
   }

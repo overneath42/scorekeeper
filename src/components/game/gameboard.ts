@@ -127,6 +127,7 @@ export class GameboardComponent extends BaseComponent {
             `
           )}
         </div>
+        <x-score-popover></x-score-popover>
       </div>
     `;
   }

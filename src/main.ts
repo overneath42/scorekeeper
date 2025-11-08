@@ -6,7 +6,7 @@ import "./components/providers/game-provider.js";
 import "./components/providers/game-list-provider.js";
 
 import "./components/game/gameboard.js";
-import "./components/game/elements/score-form.js";
+import "./components/game/elements/score-popover.js";
 import "./components/game/elements/header.js";
 import "./components/game/elements/scores.js";
 import "./components/game/elements/score.js";
