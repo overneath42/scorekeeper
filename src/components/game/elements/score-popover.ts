@@ -7,22 +7,33 @@ import { BaseComponent } from "@/utils";
 
 @customElement("x-score-popover")
 export class ScorePopoverComponent extends BaseComponent {
+  /**
+   * The injected game context containing players and actions.
+   * Provided via Lit's context consumer.
+   */
   @consume({ context: gameContext, subscribe: true })
   game?: GameContext;
 
+  /** Index of the player for which the popover is shown (0-based). */
   @property({ type: Number, attribute: "player-index" })
   playerIndex: number = 0;
 
+  /** Whether the popover is currently visible. */
   @property({ type: Boolean })
   open: boolean = false;
 
+  /** Current value of the score input field (string while editing). */
   @state()
   inputValue: string = "";
 
+  /** The DOM element that triggered showing the popover. Used for positioning. */
   @state()
   targetElement?: HTMLElement;
 
+  /** Ref to the popover wrapper element. */
   popoverRef: Ref<HTMLDivElement> = createRef();
+
+  /** Ref to the numeric input inside the popover. */
   inputRef: Ref<HTMLInputElement> = createRef();
 
   connectedCallback(): void {
@@ -53,16 +64,22 @@ export class ScorePopoverComponent extends BaseComponent {
   }
 
   showScorePopover(targetElement: HTMLElement) {
+    /**
+     * Opens the popover and records the element that triggered it.
+     * @param targetElement The DOM element used to calculate popover positioning.
+     */
     this.targetElement = targetElement;
     this.open = true;
   }
 
   hideScorePopover() {
+    /** Close the popover and clear the target element. */
     this.open = false;
     this.targetElement = undefined;
   }
 
   private handleKeydown = (event: KeyboardEvent) => {
+    // Keyboard shortcuts: Escape closes, Enter submits.
     if (event.key === "Escape") {
       this.hideScorePopover();
     } else if (event.key === "Enter") {
@@ -72,11 +89,13 @@ export class ScorePopoverComponent extends BaseComponent {
   };
 
   private handleInputChange = (event: Event) => {
+    // Update the internal inputValue state from the input element.
     const input = event.target as HTMLInputElement;
     this.inputValue = input.value;
   };
 
   private handleSubmit = () => {
+    // Parse the current input and submit as a numeric score. Empty input => 0.
     const score = this.inputValue.trim() === "" ? 0 : parseInt(this.inputValue);
 
     if (isNaN(score)) {
@@ -89,6 +108,7 @@ export class ScorePopoverComponent extends BaseComponent {
   };
 
   private handleCancel = () => {
+    // Cancel the operation and close the popover without saving.
     this.hideScorePopover();
   };
 
@@ -105,7 +125,7 @@ export class ScorePopoverComponent extends BaseComponent {
       return html``;
     }
 
-    const popoverStyle = this.targetElement ? this.getPopoverStyle() : "";
+    const popoverStyle = this.targetElement ? this.formatCSSProperties(this.getPopoverStyle()) : "";
 
     return html`
       <div
@@ -150,27 +170,99 @@ export class ScorePopoverComponent extends BaseComponent {
     `;
   }
 
-  private getPopoverStyle(): string {
-    if (!this.targetElement) return "";
+  private getPopoverStyle(): Partial<CSSStyleDeclaration> {
+    if (!this.targetElement) return {};
 
-    const targetRect = this.targetElement.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const popoverWidth = 256; // min-w-64 = 16rem = 256px
-
-    // Position above the target element
-    const top = targetRect.top - 10; // 10px gap above target
-
-    // Center horizontally on the target, but keep within viewport
-    let left = targetRect.left + (targetRect.width / 2) - (popoverWidth / 2);
-
-    // Ensure popover stays within viewport
-    if (left < 10) {
-      left = 10;
-    } else if (left + popoverWidth > viewportWidth - 10) {
-      left = viewportWidth - popoverWidth - 10;
+    const gridContainer = document.querySelector('.game-detail-grid') as HTMLElement;
+    
+    if (!gridContainer) {
+      // If the expected grid isn't present, fall back to a simpler positioning calculation.
+      return this.getFallbackStyle();
     }
 
-    return `position: fixed; top: ${top}px; left: ${left}px; transform: translateY(-100%);`;
+    return this.getGridBasedStyle(gridContainer);
+  }
+
+  private getFallbackStyle(): Partial<CSSStyleDeclaration> {
+    if (!this.targetElement) return {};
+
+    const targetRect = this.targetElement.getBoundingClientRect();
+    const popoverWidth = 256; // min-w-64 = 16rem = 256px
+    const viewportWidth = window.innerWidth;
+
+    const top = targetRect.top - 10;
+    const left = this.constrainHorizontalPosition(
+      targetRect.right - popoverWidth,
+      popoverWidth,
+      viewportWidth
+    );
+
+    return {
+      position: 'fixed',
+      top: `${top}px`,
+      left: `${left}px`,
+      transform: 'translateY(-100%)'
+    };
+  }
+
+  private getGridBasedStyle(gridContainer: HTMLElement): Partial<CSSStyleDeclaration> {
+    if (!this.targetElement) return {};
+
+    const containerRect = gridContainer.getBoundingClientRect();
+    const targetRect = this.targetElement.getBoundingClientRect();
+    const popoverWidth = 256; // min-w-64 = 16rem = 256px
+    const viewportWidth = window.innerWidth;
+
+    const top = targetRect.top - 10; // 10px gap above target
+    const columnRightEdge = this.getColumnRightEdge(gridContainer, containerRect);
+    const left = this.constrainHorizontalPosition(
+      columnRightEdge - popoverWidth,
+      popoverWidth,
+      viewportWidth
+    );
+
+    return {
+      position: 'fixed',
+      top: `${top}px`,
+      left: `${left}px`,
+      right: 'auto',
+      bottom: 'auto',
+      transform: 'translateY(-100%)'
+    };
+  }
+
+  private getColumnRightEdge(gridContainer: HTMLElement, containerRect: DOMRect): number {
+    // Determine the number of columns from the CSS custom property
+    const gridColumnsStyle = getComputedStyle(gridContainer).getPropertyValue('--grid-columns') || '1';
+    const gridColumns = parseInt(gridColumnsStyle);
+    const columnWidth = containerRect.width / gridColumns;
+    // Right edge of the player's column (container left + columns * width)
+    return containerRect.left + ((this.playerIndex + 1) * columnWidth);
+  }
+
+  private constrainHorizontalPosition(left: number, popoverWidth: number, viewportWidth: number): number {
+    const margin = 10;
+    
+    if (left < margin) {
+      return margin;
+    }
+    
+    if (left + popoverWidth > viewportWidth - margin) {
+      return viewportWidth - popoverWidth - margin;
+    }
+    
+    return left;
+  }
+
+  private formatCSSProperties(styles: Partial<CSSStyleDeclaration>): string {
+    // Convert a Partial<CSSStyleDeclaration> into an inline style string.
+    return Object.entries(styles)
+      .map(([key, value]) => {
+        // Convert camelCase keys to kebab-case for CSS
+        const cssKey = key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+        return `${cssKey}: ${value}`;
+      })
+      .join('; ');
   }
 }
 
