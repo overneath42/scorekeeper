@@ -64,16 +64,11 @@ export class ScorePopoverComponent extends BaseComponent {
   }
 
   showScorePopover(targetElement: HTMLElement) {
-    /**
-     * Opens the popover and records the element that triggered it.
-     * @param targetElement The DOM element used to calculate popover positioning.
-     */
     this.targetElement = targetElement;
     this.open = true;
   }
 
   hideScorePopover() {
-    /** Close the popover and clear the target element. */
     this.open = false;
     this.targetElement = undefined;
   }
@@ -108,8 +103,13 @@ export class ScorePopoverComponent extends BaseComponent {
   };
 
   private handleCancel = () => {
-    // Cancel the operation and close the popover without saving.
     this.hideScorePopover();
+  };
+
+  private handleQuickScore = (points: number) => {
+    const currentValue = this.inputValue.trim() === "" ? 0 : parseInt(this.inputValue);
+    const newValue = isNaN(currentValue) ? points : currentValue + points;
+    this.inputValue = newValue.toString();
   };
 
   private get buttonText(): string {
@@ -148,8 +148,30 @@ export class ScorePopoverComponent extends BaseComponent {
             placeholder="Enter score"
             .value=${this.inputValue}
             @input=${this.handleInputChange}
-            @keydown=${this.handleKeydown}
-          />
+            @keydown=${this.handleKeydown} />
+        </div>
+
+        <div class="mb-4">
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="flex-1 px-3 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              @click=${() => this.handleQuickScore(1)}>
+              +1
+            </button>
+            <button
+              type="button"
+              class="flex-1 px-3 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              @click=${() => this.handleQuickScore(5)}>
+              +5
+            </button>
+            <button
+              type="button"
+              class="flex-1 px-3 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              @click=${() => this.handleQuickScore(10)}>
+              +10
+            </button>
+          </div>
         </div>
 
         <div class="flex gap-2">
@@ -173,8 +195,8 @@ export class ScorePopoverComponent extends BaseComponent {
   private getPopoverStyle(): Partial<CSSStyleDeclaration> {
     if (!this.targetElement) return {};
 
-    const gridContainer = document.querySelector('.game-detail-grid') as HTMLElement;
-    
+    const gridContainer = document.querySelector(".game-detail-grid") as HTMLElement;
+
     if (!gridContainer) {
       // If the expected grid isn't present, fall back to a simpler positioning calculation.
       return this.getFallbackStyle();
@@ -198,10 +220,10 @@ export class ScorePopoverComponent extends BaseComponent {
     );
 
     return {
-      position: 'fixed',
+      position: "fixed",
       top: `${top}px`,
       left: `${left}px`,
-      transform: 'translateY(-100%)'
+      transform: "translateY(-100%)",
     };
   }
 
@@ -222,35 +244,40 @@ export class ScorePopoverComponent extends BaseComponent {
     );
 
     return {
-      position: 'fixed',
+      position: "fixed",
       top: `${top}px`,
       left: `${left}px`,
-      right: 'auto',
-      bottom: 'auto',
-      transform: 'translateY(-100%)'
+      right: "auto",
+      bottom: "auto",
+      transform: "translateY(-100%)",
     };
   }
 
   private getColumnRightEdge(gridContainer: HTMLElement, containerRect: DOMRect): number {
     // Determine the number of columns from the CSS custom property
-    const gridColumnsStyle = getComputedStyle(gridContainer).getPropertyValue('--grid-columns') || '1';
+    const gridColumnsStyle =
+      getComputedStyle(gridContainer).getPropertyValue("--grid-columns") || "1";
     const gridColumns = parseInt(gridColumnsStyle);
     const columnWidth = containerRect.width / gridColumns;
     // Right edge of the player's column (container left + columns * width)
-    return containerRect.left + ((this.playerIndex + 1) * columnWidth);
+    return containerRect.left + (this.playerIndex + 1) * columnWidth;
   }
 
-  private constrainHorizontalPosition(left: number, popoverWidth: number, viewportWidth: number): number {
+  private constrainHorizontalPosition(
+    left: number,
+    popoverWidth: number,
+    viewportWidth: number
+  ): number {
     const margin = 10;
-    
+
     if (left < margin) {
       return margin;
     }
-    
+
     if (left + popoverWidth > viewportWidth - margin) {
       return viewportWidth - popoverWidth - margin;
     }
-    
+
     return left;
   }
 
@@ -259,10 +286,10 @@ export class ScorePopoverComponent extends BaseComponent {
     return Object.entries(styles)
       .map(([key, value]) => {
         // Convert camelCase keys to kebab-case for CSS
-        const cssKey = key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+        const cssKey = key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
         return `${cssKey}: ${value}`;
       })
-      .join('; ');
+      .join("; ");
   }
 }
 
