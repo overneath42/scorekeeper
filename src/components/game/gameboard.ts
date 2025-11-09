@@ -1,11 +1,10 @@
 import { consume } from "@lit/context";
 import classNames from "classnames";
-import { html, nothing } from "lit";
+import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { BaseComponent } from "@/utils/index.js";
 import { type GameContext, gameContext } from "@/context";
 import { GameStorageService } from "@/services";
-import { BUTTON_WRAPPER_HEIGHT } from "@/constants";
 
 @customElement("x-gameboard")
 export class GameboardComponent extends BaseComponent {
@@ -88,11 +87,7 @@ export class GameboardComponent extends BaseComponent {
     }
 
     return html`
-      <div
-        class="overflow-x-auto overflow-y-hidden snap-x"
-        style="height: calc(100% - ${this.game?.status === "active"
-          ? `${BUTTON_WRAPPER_HEIGHT}px`
-          : "0px"});">
+      <div class="overflow-x-auto overflow-y-hidden snap-x h-full">
         <div class="game-detail-grid" style=${this.variableStyles}>
           <!-- Player Headers (Sticky) -->
           ${this.players.map(
@@ -132,8 +127,8 @@ export class GameboardComponent extends BaseComponent {
             `
           )}
         </div>
+        <x-score-popover></x-score-popover>
       </div>
-      ${this.game?.status === "active" ? html`<x-game-score-form></x-game-score-form>` : nothing}
     `;
   }
 }

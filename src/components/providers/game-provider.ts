@@ -77,7 +77,9 @@ export class GameProviderComponent extends BaseComponent {
     return [];
   };
 
-  private getCurrentWinner = (): GamePlayer[] => {
+  private getCurrentWinners = (): GamePlayer[] => {
+    if (!this.game) return [];
+
     const scores = this.game.players.map((player) => this.getPlayerCurrentScore(player.index));
     const maxScore = Math.max(...scores);
     return this.game.players.filter(
@@ -86,8 +88,13 @@ export class GameProviderComponent extends BaseComponent {
   };
 
   private isCurrentWinner = (playerIndex: number): boolean => {
-    return this.getCurrentWinner().some((player) => player.index === playerIndex);
+    return this.getCurrentWinners().some((player) => player.index === playerIndex);
   };
+
+  private get gameIsTied(): boolean {
+    const currentWinners = this.getCurrentWinners();
+    return currentWinners.length > 1;
+  }
 
   /**
    * Loads a stored game into the current game state, attaching relevant game methods to the loaded object.
@@ -109,6 +116,7 @@ export class GameProviderComponent extends BaseComponent {
       getPlayerCurrentScore: this.getPlayerCurrentScore,
       isCurrentWinner: this.isCurrentWinner,
       loadGameById: this.loadGameById,
+      isTied: this.gameIsTied,
     };
     this.requestUpdate();
   };
@@ -150,6 +158,7 @@ export class GameProviderComponent extends BaseComponent {
     getPlayerCurrentScore: this.getPlayerCurrentScore,
     isCurrentWinner: this.isCurrentWinner,
     loadGameById: this.loadGameById,
+    isTied: this.gameIsTied,
   };
 
   render() {
