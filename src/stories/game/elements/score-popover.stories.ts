@@ -38,7 +38,7 @@ const meta: Meta = {
               const trigger = e.currentTarget as HTMLElement | null;
               const popover = trigger?.parentElement?.querySelector(
                 "x-score-popover"
-              ) as any;
+              ) as HTMLElement & { showScorePopover: (trigger: HTMLElement) => void } | null;
               if (popover && trigger) {
                 popover.showScorePopover(trigger);
               }
@@ -54,7 +54,7 @@ const meta: Meta = {
 };
 
 export default meta;
-type Story = StoryObj<any>;
+type Story = StoryObj;
  
 
 export const Default: Story = {
@@ -98,7 +98,7 @@ export const DifferentPlayers: Story = {
                 const trigger = e.currentTarget as HTMLElement | null;
                 const popover = trigger?.parentElement?.querySelector(
                   "x-score-popover"
-                ) as any;
+                ) as HTMLElement & { showScorePopover: (trigger: HTMLElement) => void } | null;
                 if (popover && trigger) {
                   popover.showScorePopover(trigger);
                 }
@@ -114,7 +114,7 @@ export const DifferentPlayers: Story = {
                 const trigger = e.currentTarget as HTMLElement | null;
                 const popover = trigger?.parentElement?.querySelector(
                   "x-score-popover"
-                ) as any;
+                ) as HTMLElement & { showScorePopover: (trigger: HTMLElement) => void } | null;
                 if (popover && trigger) {
                   popover.showScorePopover(trigger);
                 }
@@ -130,7 +130,7 @@ export const DifferentPlayers: Story = {
                 const trigger = e.currentTarget as HTMLElement | null;
                 const popover = trigger?.parentElement?.querySelector(
                   "x-score-popover"
-                ) as any;
+                ) as HTMLElement & { showScorePopover: (trigger: HTMLElement) => void } | null;
                 if (popover && trigger) {
                   popover.showScorePopover(trigger);
                 }
@@ -179,7 +179,7 @@ export const GameboardContext: Story = {
                     const trigger = e.currentTarget as HTMLElement | null;
                     const popover = trigger
                       ?.closest(".game-detail-grid")
-                      ?.querySelector('x-score-popover[player-index="0"]') as any;
+                      ?.querySelector('x-score-popover[player-index="0"]') as HTMLElement & { showScorePopover: (trigger: HTMLElement) => void } | null;
                     if (popover && trigger) {
                       popover.showScorePopover(trigger);
                     }
@@ -201,7 +201,7 @@ export const GameboardContext: Story = {
                     const trigger = e.currentTarget as HTMLElement | null;
                     const popover = trigger
                       ?.closest(".game-detail-grid")
-                      ?.querySelector('x-score-popover[player-index="1"]') as any;
+                      ?.querySelector('x-score-popover[player-index="1"]') as HTMLElement & { showScorePopover: (trigger: HTMLElement) => void } | null;
                     if (popover && trigger) {
                       popover.showScorePopover(trigger);
                     }
@@ -223,7 +223,7 @@ export const GameboardContext: Story = {
                     const trigger = e.currentTarget as HTMLElement | null;
                     const popover = trigger
                       ?.closest(".game-detail-grid")
-                      ?.querySelector('x-score-popover[player-index="2"]') as any;
+                      ?.querySelector('x-score-popover[player-index="2"]') as HTMLElement & { showScorePopover: (trigger: HTMLElement) => void } | null;
                     if (popover && trigger) {
                       popover.showScorePopover(trigger);
                     }
@@ -276,7 +276,7 @@ export const InteractiveDemo: Story = {
                 const trigger = e.currentTarget as HTMLElement | null;
                 const popover = trigger?.parentElement?.querySelector(
                   "x-score-popover"
-                ) as any;
+                ) as HTMLElement & { showScorePopover: (trigger: HTMLElement) => void } | null;
                 if (popover && trigger) {
                   popover.showScorePopover(trigger);
                 }

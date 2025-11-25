@@ -55,6 +55,17 @@ export class GameListGameComponent extends BaseComponent {
       .sort((a, b) => b.score - a.score);
   }
 
+  private formatTime(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    return `${minutes}:${String(secs).padStart(2, '0')}`;
+  }
+
   render() {
     if (!this.game) {
       return html`<div>Loading...</div>`;
@@ -84,6 +95,19 @@ export class GameListGameComponent extends BaseComponent {
             ${this.game.targetScore
               ? html` <p class="text-xs text-blue-600">Target: ${this.game.targetScore} points</p> `
               : html` <p class="text-xs text-gray-500">Open-ended game</p> `}
+
+            ${this.game.timeLimit
+              ? html`
+                  <p class="text-xs ${this.game.timeRemaining && this.game.timeRemaining > 0 ? 'text-orange-600' : 'text-red-600'} flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    ${this.game.timeRemaining && this.game.timeRemaining > 0
+                      ? html`${this.formatTime(this.game.timeRemaining)} remaining`
+                      : html`Time expired`}
+                  </p>
+                `
+              : ''}
           </div>
 
           <div class="flex items-center gap-2 ml-4">
