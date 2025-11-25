@@ -1,4 +1,4 @@
-import { LocalStorageAdapter, type Game, type GamePlayer, type ScoreEntry } from "@/utils";
+import { LocalStorageAdapter, StorageAdapter, type Game, type GamePlayer, type ScoreEntry } from "@/utils";
 
 export interface StoredGame extends Game {
   id: string;
@@ -19,7 +19,7 @@ export interface GameSummary {
 }
 
 export class GameStorageService {
-  private storage: LocalStorageAdapter<StoredGame>;
+  private storage: StorageAdapter<StoredGame>;
   private static instance: GameStorageService;
 
   private constructor() {
