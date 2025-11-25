@@ -59,6 +59,10 @@ export class GameDetailFormComponent extends BaseComponent {
     return (this.game?.scoringHistory ?? []).length === 0;
   }
 
+  get canChangeTimeSettings() {
+    return (this.game?.scoringHistory ?? []).length === 0;
+  }
+
   connectedCallback() {
     super.connectedCallback();
     if (this.context === "edit") {
@@ -257,16 +261,20 @@ export class GameDetailFormComponent extends BaseComponent {
           </div>
           <!-- Timed Game Field -->
           <div class="form-group">
-            <label class="flex items-center gap-2 cursor-pointer">
+            <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
               <input
                 type="checkbox"
                 id="timed-game"
                 name="timedGame"
                 .checked=${this.isTimedGame}
+                ?disabled=${!this.canChangeTimeSettings}
                 @change="${this.handleTimedGameToggle}"
                 class="w-4 h-4" />
               <span class="form-label mb-0">Timed Game</span>
             </label>
+            ${!this.canChangeTimeSettings ? html`
+              <p class="form-help-text text-orange-600">Timer settings cannot be changed after scoring begins</p>
+            ` : ''}
           </div>
           ${this.isTimedGame ? html`
             <!-- Time Limit Fields -->
@@ -282,6 +290,7 @@ export class GameDetailFormComponent extends BaseComponent {
                     step="1"
                     class="form-input"
                     placeholder="Hours"
+                    ?disabled=${!this.canChangeTimeSettings}
                     .value=${this.hours > 0 ? String(this.hours) : ""}
                     @input="${this.handleHoursInput}" />
                 </div>
@@ -295,6 +304,7 @@ export class GameDetailFormComponent extends BaseComponent {
                     step="1"
                     class="form-input"
                     placeholder="Minutes"
+                    ?disabled=${!this.canChangeTimeSettings}
                     .value=${this.minutes > 0 ? String(this.minutes) : ""}
                     @input="${this.handleMinutesInput}" />
                 </div>
@@ -306,22 +316,24 @@ export class GameDetailFormComponent extends BaseComponent {
               <div class="form-group">
                 <label class="form-label">If time expires with no winner</label>
                 <div class="flex flex-col gap-2">
-                  <label class="flex items-center gap-2 cursor-pointer">
+                  <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
                     <input
                       type="radio"
                       name="timerBehavior"
                       value="highest-score"
                       .checked=${this.timerBehavior === 'highest-score'}
+                      ?disabled=${!this.canChangeTimeSettings}
                       @change="${this.handleTimerBehaviorChange}"
                       class="w-4 h-4" />
                     <span>Highest Score Wins</span>
                   </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
+                  <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
                     <input
                       type="radio"
                       name="timerBehavior"
                       value="no-winner"
                       .checked=${this.timerBehavior === 'no-winner'}
+                      ?disabled=${!this.canChangeTimeSettings}
                       @change="${this.handleTimerBehaviorChange}"
                       class="w-4 h-4" />
                     <span>No Winner</span>
