@@ -100,7 +100,7 @@ export class TimeExpiryModalComponent extends BaseComponent {
         ${ref(this.modalRef)}
         popover="manual"
         class="bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-8 z-50 max-w-md"
-        style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+        style="position: fixed; top: 50%; left: 50vw; transform: translate(-25vw, -50%);"
         @click=${(e: Event) => e.stopPropagation()}>
 
         <!-- Clock Icon -->
