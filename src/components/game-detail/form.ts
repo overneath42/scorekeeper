@@ -30,6 +30,22 @@ export class GameDetailFormComponent extends BaseComponent {
   @state()
   targetScore: number | null = null;
 
+  @property({ type: Boolean })
+  @state()
+  isTimedGame: boolean = false;
+
+  @property({ type: Number })
+  @state()
+  hours: number = 0;
+
+  @property({ type: Number })
+  @state()
+  minutes: number = 0;
+
+  @property({ type: String })
+  @state()
+  timerBehavior: 'no-winner' | 'highest-score' | null = null;
+
   @property({ type: String, attribute: "context" })
   context: GameFormContext = "create";
 
@@ -61,6 +77,15 @@ export class GameDetailFormComponent extends BaseComponent {
         this.gameName = storedGame.name;
         this.targetScore = storedGame.targetScore;
         this.players = storedGame.players.map((player) => player.name);
+
+        // Populate time-related fields
+        if (storedGame.timeLimit) {
+          this.isTimedGame = true;
+          const totalMinutes = Math.floor(storedGame.timeLimit / 60);
+          this.hours = Math.floor(totalMinutes / 60);
+          this.minutes = totalMinutes % 60;
+          this.timerBehavior = storedGame.timerBehavior;
+        }
       } else {
         console.warn(`No stored game found with ID: ${id}`);
       }
@@ -85,7 +110,20 @@ export class GameDetailFormComponent extends BaseComponent {
   }
 
   private handleCreateSubmit() {
-    const game = this.storage.createGame(this.gameName, this.players, this.targetScore);
+    const timeLimit = this.isTimedGame
+      ? (this.hours * 3600) + (this.minutes * 60)
+      : null;
+    const timerBehavior = this.isTimedGame && this.targetScore !== null
+      ? this.timerBehavior
+      : null;
+
+    const game = this.storage.createGame(
+      this.gameName,
+      this.players,
+      this.targetScore,
+      timeLimit,
+      timerBehavior
+    );
     this.gameList?.addGame(game);
     this.redirectToGameboard(game.id);
   }
@@ -97,6 +135,13 @@ export class GameDetailFormComponent extends BaseComponent {
       const existingGame = this.storage.getStoredGame(id);
 
       if (existingGame) {
+        const timeLimit = this.isTimedGame
+          ? (this.hours * 3600) + (this.minutes * 60)
+          : null;
+        const timerBehavior = this.isTimedGame && this.targetScore !== null
+          ? this.timerBehavior
+          : null;
+
         const updatedGame = {
           ...existingGame,
           name: this.gameName,
@@ -105,6 +150,9 @@ export class GameDetailFormComponent extends BaseComponent {
             index,
             name: playerName,
           })),
+          timeLimit,
+          timeRemaining: timeLimit,
+          timerBehavior,
           updatedAt: new Date(),
         };
 
@@ -131,6 +179,34 @@ export class GameDetailFormComponent extends BaseComponent {
     this.targetScore = input.value ? parseInt(input.value) : null;
   }
 
+  private handleTimedGameToggle(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.isTimedGame = input.checked;
+    if (!this.isTimedGame) {
+      this.hours = 0;
+      this.minutes = 0;
+      this.timerBehavior = null;
+    } else if (this.targetScore !== null && this.timerBehavior === null) {
+      // Default to 'highest-score' when enabling timed game with target score
+      this.timerBehavior = 'highest-score';
+    }
+  }
+
+  private handleHoursInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.hours = input.value ? parseInt(input.value) : 0;
+  }
+
+  private handleMinutesInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.minutes = input.value ? parseInt(input.value) : 0;
+  }
+
+  private handleTimerBehaviorChange(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.timerBehavior = input.value as 'no-winner' | 'highest-score';
+  }
+
   private redirectToGameboard(gameId: string) {
     const url = new URL("/pages/play.html", window.location.href);
     url.searchParams.set("id", gameId);
@@ -138,12 +214,13 @@ export class GameDetailFormComponent extends BaseComponent {
   }
 
   private get formIsValid(): boolean {
-    const isValid =
-      this.players.length >= 2 &&
-      this.gameName.trim().length > 0 &&
-      (this.targetScore === null || this.targetScore > 0);
+    const hasPlayers = this.players.length >= 2;
+    const hasName = this.gameName.trim().length > 0;
+    const targetScoreValid = this.targetScore === null || this.targetScore > 0;
+    const timeValid = !this.isTimedGame || (this.hours > 0 || this.minutes > 0);
+    const timerBehaviorValid = !this.isTimedGame || this.targetScore === null || this.timerBehavior !== null;
 
-    return isValid;
+    return hasPlayers && hasName && targetScoreValid && timeValid && timerBehaviorValid;
   }
 
   render() {
@@ -178,6 +255,81 @@ export class GameDetailFormComponent extends BaseComponent {
               @input="${this.handleTargetScoreInput}" />
             <p class="form-help-text">Optional - leave blank for open-ended games</p>
           </div>
+          <!-- Timed Game Field -->
+          <div class="form-group">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                id="timed-game"
+                name="timedGame"
+                .checked=${this.isTimedGame}
+                @change="${this.handleTimedGameToggle}"
+                class="w-4 h-4" />
+              <span class="form-label mb-0">Timed Game</span>
+            </label>
+          </div>
+          ${this.isTimedGame ? html`
+            <!-- Time Limit Fields -->
+            <div class="form-group">
+              <label class="form-label">Time Limit</label>
+              <div class="flex gap-2">
+                <div class="flex-1">
+                  <input
+                    type="number"
+                    id="hours"
+                    name="hours"
+                    min="0"
+                    step="1"
+                    class="form-input"
+                    placeholder="Hours"
+                    .value=${this.hours > 0 ? String(this.hours) : ""}
+                    @input="${this.handleHoursInput}" />
+                </div>
+                <div class="flex-1">
+                  <input
+                    type="number"
+                    id="minutes"
+                    name="minutes"
+                    min="0"
+                    max="59"
+                    step="1"
+                    class="form-input"
+                    placeholder="Minutes"
+                    .value=${this.minutes > 0 ? String(this.minutes) : ""}
+                    @input="${this.handleMinutesInput}" />
+                </div>
+              </div>
+              <p class="form-help-text">Enter at least 1 minute</p>
+            </div>
+            ${this.targetScore !== null ? html`
+              <!-- Timer Behavior Field -->
+              <div class="form-group">
+                <label class="form-label">If time expires with no winner</label>
+                <div class="flex flex-col gap-2">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="timerBehavior"
+                      value="highest-score"
+                      .checked=${this.timerBehavior === 'highest-score'}
+                      @change="${this.handleTimerBehaviorChange}"
+                      class="w-4 h-4" />
+                    <span>Highest Score Wins</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="timerBehavior"
+                      value="no-winner"
+                      .checked=${this.timerBehavior === 'no-winner'}
+                      @change="${this.handleTimerBehaviorChange}"
+                      class="w-4 h-4" />
+                    <span>No Winner</span>
+                  </label>
+                </div>
+              </div>
+            ` : ''}
+          ` : ''}
           <!-- Players Field -->
           <x-game-detail-player-list
             .players="${this.players}"

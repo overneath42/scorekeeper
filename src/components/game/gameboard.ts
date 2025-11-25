@@ -128,6 +128,7 @@ export class GameboardComponent extends BaseComponent {
           )}
         </div>
         <x-score-popover></x-score-popover>
+        <x-time-expiry-modal></x-time-expiry-modal>
       </div>
     `;
   }

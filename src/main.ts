@@ -8,6 +8,8 @@ import "./components/providers/game-list-provider.js";
 import "./components/game/gameboard.js";
 import "./components/game/elements/score-popover.js";
 import "./components/game/elements/header.js";
+import "./components/game/elements/game-timer.js";
+import "./components/game/elements/time-expiry-modal.js";
 import "./components/game/elements/scores.js";
 import "./components/game/elements/score.js";
 import "./components/game/elements/player-name.js";

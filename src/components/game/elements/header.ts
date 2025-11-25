@@ -73,6 +73,7 @@ export class GameHeaderComponent extends BaseComponent {
         </button>
         <div class="row-start-2 col-span-2 lg:row-start-1 lg:col-span-1 lg:col-start-2 self-center">
           <h1 class="text-center text-3xl font-semibold">${this.title}</h1>
+          <x-game-timer></x-game-timer>
           ${this.startedOn ? html`<p class="text-center">${this.startedOn}</p>` : nothing}
         </div>
       </header>

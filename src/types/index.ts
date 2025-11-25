@@ -10,4 +10,8 @@ export interface Game {
   targetScore: number | null;
   players: GamePlayer[];
   scoringHistory: ScoreEntry[];
+  timeLimit: number | null;
+  timeRemaining: number | null;
+  lastActiveAt: Date | null;
+  timerBehavior: 'no-winner' | 'highest-score' | null;
 }

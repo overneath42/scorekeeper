@@ -50,6 +50,7 @@ export class GameStorageService {
         ...game,
         createdAt: new Date(game.createdAt),
         updatedAt: new Date(game.updatedAt),
+        lastActiveAt: game.lastActiveAt ? new Date(game.lastActiveAt) : null,
       };
     }
     return null;
@@ -82,7 +83,13 @@ export class GameStorageService {
     return this.storage.remove(gameId);
   }
 
-  createGame(name: string, playerNames: string[], targetScore: number | null = null): StoredGame {
+  createGame(
+    name: string,
+    playerNames: string[],
+    targetScore: number | null = null,
+    timeLimit: number | null = null,
+    timerBehavior: 'no-winner' | 'highest-score' | null = null
+  ): StoredGame {
     const now = new Date();
     const id = generateUUID();
     const timecode = `game_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -99,6 +106,10 @@ export class GameStorageService {
       players,
       targetScore,
       scoringHistory: [],
+      timeLimit,
+      timeRemaining: timeLimit,
+      lastActiveAt: null,
+      timerBehavior,
       createdAt: now,
       updatedAt: now,
       status: "active",
@@ -135,6 +146,22 @@ export class GameStorageService {
     return this.saveGame(storedGame);
   }
 
+  updateTimeRemaining(gameId: string, timeRemaining: number): boolean {
+    const storedGame = this.getStoredGame(gameId);
+    if (!storedGame) return false;
+
+    storedGame.timeRemaining = timeRemaining;
+    return this.saveGame(storedGame);
+  }
+
+  updateLastActiveAt(gameId: string, timestamp: Date): boolean {
+    const storedGame = this.getStoredGame(gameId);
+    if (!storedGame) return false;
+
+    storedGame.lastActiveAt = timestamp;
+    return this.saveGame(storedGame);
+  }
+
   calculatePlayerScores(storedGame: StoredGame): number[] {
     const scores = new Array(storedGame.players.length).fill(0);
     storedGame.scoringHistory.forEach(([playerIndex, score]) => {
@@ -157,6 +184,10 @@ export class GameStorageService {
       targetScore: storedGame.targetScore,
       players: storedGame.players,
       scoringHistory: storedGame.scoringHistory,
+      timeLimit: storedGame.timeLimit,
+      timeRemaining: storedGame.timeRemaining,
+      lastActiveAt: storedGame.lastActiveAt,
+      timerBehavior: storedGame.timerBehavior,
     };
   }
 

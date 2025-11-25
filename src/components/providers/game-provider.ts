@@ -11,6 +11,129 @@ const now = new Date();
 export class GameProviderComponent extends BaseComponent {
   private storage = GameStorageService.getInstance();
   private currentGameId: string | null = null;
+  private timerInterval: number | null = null;
+  private lastSaveTime: number = 0;
+  private isPageVisible: boolean = true;
+
+  connectedCallback() {
+    super.connectedCallback();
+    // Set up Page Visibility API listener
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.stopTimer();
+    document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+  }
+
+  private handleVisibilityChange = () => {
+    this.isPageVisible = !document.hidden;
+  };
+
+  private startTimer() {
+    // Only start timer if game has a time limit, is active, and has remaining time
+    if (!this.game.timeLimit || this.game.status !== "active" || !this.game.timeRemaining || this.game.timeRemaining <= 0) {
+      return;
+    }
+
+    // Don't start if already running
+    if (this.timerInterval !== null) {
+      return;
+    }
+
+    // Update lastActiveAt when starting timer
+    if (this.currentGameId) {
+      this.storage.updateLastActiveAt(this.currentGameId, new Date());
+    }
+
+    this.timerInterval = window.setInterval(() => this.tickTimer(), 1000);
+  }
+
+  private stopTimer() {
+    if (this.timerInterval !== null) {
+      window.clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+  }
+
+  private tickTimer() {
+    // Only tick if page is visible, game is active, and has time remaining
+    if (!this.isPageVisible || this.game.status !== "active" || !this.game.timeRemaining || this.game.timeRemaining <= 0) {
+      return;
+    }
+
+    // Decrement time remaining and trigger reactivity by reassigning the game object
+    this.game = {
+      ...this.game,
+      timeRemaining: this.game.timeRemaining - 1
+    };
+
+    // Save to storage every 5 seconds
+    const now = Date.now();
+    if (now - this.lastSaveTime >= 5000) {
+      if (this.currentGameId && this.game.timeRemaining !== null) {
+        this.storage.updateTimeRemaining(this.currentGameId, this.game.timeRemaining);
+        this.storage.updateLastActiveAt(this.currentGameId, new Date());
+      }
+      this.lastSaveTime = now;
+    }
+
+    // Check for time expiry
+    if (this.game.timeRemaining !== null && this.game.timeRemaining <= 0) {
+      this.handleTimeExpiry();
+    }
+  }
+
+  private handleTimeExpiry() {
+    this.stopTimer();
+
+    if (!this.currentGameId) return;
+
+    // Save final time remaining (0)
+    this.storage.updateTimeRemaining(this.currentGameId, 0);
+
+    // Determine winner based on rules
+    const playerScores = this.storage.calculatePlayerScores(this.game);
+    const maxScore = Math.max(...playerScores);
+    let hasWinner = false;
+
+    if (this.game.targetScore) {
+      // Check if anyone met the target score
+      const someoneMetTarget = playerScores.some(score => score >= this.game.targetScore!);
+
+      if (someoneMetTarget) {
+        hasWinner = true;
+      } else {
+        // No one met target - apply timer behavior
+        if (this.game.timerBehavior === 'highest-score') {
+          hasWinner = maxScore > 0;
+        } else {
+          // 'no-winner' behavior
+          hasWinner = false;
+        }
+      }
+    } else {
+      // No target score - highest score wins
+      hasWinner = maxScore > 0;
+    }
+
+    // Mark game as completed
+    this.storage.updateGameStatus(this.currentGameId, "completed");
+
+    // Reload game to reflect completion status
+    const finalGame = this.storage.getStoredGame(this.currentGameId);
+    if (finalGame) {
+      this.loadGame(finalGame);
+    }
+
+    // Dispatch custom event for time expiry modal
+    this.dispatchEvent(new CustomEvent('time-expired', {
+      bubbles: true,
+      composed: true,
+      detail: { hasWinner, playerScores }
+    }));
+  }
 
   private createNewGame = (name: string, targetScore: number, players: string[]) => {
     const storedGame = this.storage.createGame(name, players, targetScore);
@@ -107,6 +230,9 @@ export class GameProviderComponent extends BaseComponent {
    * it triggers a UI update by calling `requestUpdate()`.
    */
   private loadGame = (storedGame: StoredGame) => {
+    // Stop existing timer before loading new game
+    this.stopTimer();
+
     this.game = {
       ...storedGame,
       createNewGame: this.createNewGame,
@@ -118,6 +244,12 @@ export class GameProviderComponent extends BaseComponent {
       loadGameById: this.loadGameById,
       isTied: this.gameIsTied,
     };
+
+    // Start timer if this is a timed, active game
+    if (storedGame.timeLimit && storedGame.status === "active" && storedGame.timeRemaining && storedGame.timeRemaining > 0) {
+      this.startTimer();
+    }
+
     this.requestUpdate();
   };
 
@@ -146,6 +278,10 @@ export class GameProviderComponent extends BaseComponent {
     targetScore: null,
     players: [],
     scoringHistory: [],
+    timeLimit: null,
+    timeRemaining: null,
+    lastActiveAt: null,
+    timerBehavior: null,
     createdAt: now,
     updatedAt: now,
     status: "active",
