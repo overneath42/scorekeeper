@@ -43,7 +43,7 @@ export class CurrentScoreComponent extends BaseComponent {
 
   /** Class for the score element */
   private getScoreClass(isWinner: boolean): string {
-    return classNames("text-3xl lg:text-5xl font-semibold text-gray-dark ml-auto cursor-pointer hover:opacity-75 transition-opacity", {
+    return classNames("text-3xl lg:text-5xl font-semibold text-gray-dark ml-auto", {
       "text-success": isWinner,
     });
   }
@@ -76,14 +76,14 @@ export class CurrentScoreComponent extends BaseComponent {
     const currentScore = this.getCurrentScore();
 
     return html`
-      <div class="player-current-score px-sm pt-md pb-lg border-t bg-gray-light flex gap-4 items-baseline">
+      <div
+        ${ref(this.scoreRef)}
+        class="player-current-score px-sm pt-md pb-safe-area-bottom border-t bg-gray-light flex gap-4 items-baseline cursor-pointer hover:bg-gray-200 transition-colors"
+        @click=${this.handleScoreClick}
+        title="Tap to add score"
+      >
         ${this.renderLabel(label, isWinner, isTied)}
-        <span
-          ${ref(this.scoreRef)}
-          class="${this.getScoreClass(isWinner)}"
-          @click=${this.handleScoreClick}
-          title="Tap to add score"
-        >${currentScore}</span>
+        <span class="${this.getScoreClass(isWinner)}">${currentScore}</span>
       </div>
     `;
   }

@@ -30,6 +30,9 @@ export class ScorePopoverComponent extends BaseComponent {
   @state()
   targetElement?: HTMLElement;
 
+  /** Cached position styles to prevent recalculation during re-renders (fixes keyboard jump bug). */
+  private cachedPosition?: Partial<CSSStyleDeclaration>;
+
   /** Ref to the popover wrapper element. */
   popoverRef: Ref<HTMLDivElement> = createRef();
 
@@ -71,6 +74,7 @@ export class ScorePopoverComponent extends BaseComponent {
   hideScorePopover() {
     this.open = false;
     this.targetElement = undefined;
+    this.cachedPosition = undefined; // Clear cached position when popover closes
   }
 
   private handleKeydown = (event: KeyboardEvent) => {
@@ -193,16 +197,27 @@ export class ScorePopoverComponent extends BaseComponent {
   }
 
   private getPopoverStyle(): Partial<CSSStyleDeclaration> {
+    // Return cached position if available (prevents recalculation during re-renders)
+    if (this.cachedPosition) {
+      return this.cachedPosition;
+    }
+
+    // Calculate position and cache it
     if (!this.targetElement) return {};
 
     const gridContainer = document.querySelector(".game-detail-grid") as HTMLElement;
 
+    let position: Partial<CSSStyleDeclaration>;
     if (!gridContainer) {
       // If the expected grid isn't present, fall back to a simpler positioning calculation.
-      return this.getFallbackStyle();
+      position = this.getFallbackStyle();
+    } else {
+      position = this.getGridBasedStyle(gridContainer);
     }
 
-    return this.getGridBasedStyle(gridContainer);
+    // Cache the calculated position
+    this.cachedPosition = position;
+    return position;
   }
 
   private getFallbackStyle(): Partial<CSSStyleDeclaration> {
