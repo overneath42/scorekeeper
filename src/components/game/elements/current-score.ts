@@ -48,6 +48,14 @@ export class CurrentScoreComponent extends BaseComponent {
     });
   }
 
+  /** Class for the container element */
+  private getContainerClass(isGameComplete: boolean): string {
+    return classNames("player-current-score border-t bg-gray-light flex gap-4 items-baseline", {
+      "cursor-not-allowed opacity-50": isGameComplete,
+      "cursor-pointer hover:bg-gray-200 transition-colors": !isGameComplete,
+    });
+  }
+
   /** Handle score click to show popover */
   private handleScoreClick = () => {
     if (this.scoreRef.value) {
@@ -78,9 +86,9 @@ export class CurrentScoreComponent extends BaseComponent {
     return html`
       <div
         ${ref(this.scoreRef)}
-        class="player-current-score border-t bg-gray-light flex gap-4 items-baseline cursor-pointer hover:bg-gray-200 transition-colors"
-        @click=${this.handleScoreClick}
-        title="Tap to add score"
+        class="${this.getContainerClass(isGameComplete)}"
+        @click=${isGameComplete ? undefined : this.handleScoreClick}
+        title="${isGameComplete ? 'Game is complete - scoring disabled' : 'Tap to add score'}"
       >
         ${this.renderLabel(label, isWinner, isTied)}
         <span class="${this.getScoreClass(isWinner)}">${currentScore}</span>
