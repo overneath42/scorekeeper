@@ -28,7 +28,9 @@
   }
 
   .player-current-score {
+    @apply px-sm pt-md;
     position: relative;
+    padding-bottom: calc(var(--spacing-lg) + max(env(safe-area-inset-bottom), 1rem));
 
     &::after {
       content: "";
