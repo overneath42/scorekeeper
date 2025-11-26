@@ -22,8 +22,8 @@ export class GameDetailPlayerListComponent extends BaseComponent {
   }
 
   private removePlayer(index: number) {
-    if (this.players.length > 2) {
-      // Keep minimum 2 players
+    if (this.players.length > 1) {
+      // Keep minimum 1 player
       this.players = this.players.filter((_, i) => i !== index);
       this.dispatchEvent(
         new CustomEvent("players-changed", {
@@ -62,7 +62,7 @@ export class GameDetailPlayerListComponent extends BaseComponent {
                     this.updatePlayerName(index, (e.target as HTMLInputElement).value)}"
                   class="flex-1 form-input"
                   placeholder="Player name" />
-                ${this.players.length > 2 && !this.disableEditing
+                ${this.players.length > 1 && !this.disableEditing
                   ? html`
                       <button
                         type="button"

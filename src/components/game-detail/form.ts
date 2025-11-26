@@ -218,7 +218,7 @@ export class GameDetailFormComponent extends BaseComponent {
   }
 
   private get formIsValid(): boolean {
-    const hasPlayers = this.players.length >= 2;
+    const hasPlayers = this.players.length >= 1;
     const hasName = this.gameName.trim().length > 0;
     const targetScoreValid = this.targetScore === null || this.targetScore > 0;
     const timeValid = !this.isTimedGame || (this.hours > 0 || this.minutes > 0);
