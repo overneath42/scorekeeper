@@ -33,6 +33,22 @@
     @apply bg-transparent border border-gray text-gray hover:bg-gray-light focus:outline-none focus:ring-2 focus:ring-gray focus:ring-offset-2;
   }
 
+  .btn-warning {
+    @apply bg-warning text-white hover:bg-warning-dark focus:outline-none focus:ring-2 focus:ring-warning focus:ring-offset-2;
+  }
+
+  .btn-warning-outline {
+    @apply bg-transparent border border-warning text-warning hover:bg-warning-light focus:outline-none focus:ring-2 focus:ring-warning focus:ring-offset-2;
+  }
+
+  .btn-error {
+    @apply bg-error text-white hover:bg-error-dark focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2;
+  }
+
+  .btn-error-outline {
+    @apply bg-transparent border border-error text-error hover:bg-error-light focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2;
+  }
+
   .btn:disabled {
     @apply bg-gray-400 cursor-not-allowed hover:bg-gray-400 focus:ring-0;
   }

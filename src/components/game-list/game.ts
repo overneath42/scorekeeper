@@ -1,4 +1,4 @@
-import { html } from "lit";
+import { html, nothing } from "lit";
 import barba from "@barba/core";
 import { customElement, property } from "lit/decorators.js";
 import { BaseComponent, Game } from "@/utils";
@@ -61,9 +61,20 @@ export class GameListGameComponent extends BaseComponent {
     const secs = seconds % 60;
 
     if (hours > 0) {
-      return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
     }
-    return `${minutes}:${String(secs).padStart(2, '0')}`;
+    return `${minutes}:${String(secs).padStart(2, "0")}`;
+  }
+
+  private get hasTargetScore(): boolean {
+    return this.game?.targetScore !== undefined && this.game?.targetScore !== null;
+  }
+
+  private get targetScoreMessage(): string {
+    if (!this.game || this.game.targetScore === undefined || this.game.targetScore === null) {
+      return "Open-Ended Game";
+    }
+    return `Points To Win: ${this.game.targetScore}`;
   }
 
   render() {
@@ -75,49 +86,58 @@ export class GameListGameComponent extends BaseComponent {
       <div
         class="border-b px-md pb-md first:pt-md hover:bg-blue-50 transition-colors cursor-pointer"
         @click="${this.selectGame}">
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <h3 class="font-semibold text-lg text-gray-dark mb-md">${this.game.name}</h3>
-
-            <!-- Player Scores List -->
-            <div class="space-y-1 mb-2 w-min min-w-[150px] p-2 bg-blue-100 rounded">
-              ${this.getPlayersWithScores(this.game).map(
-                (player) => html`
-                  <div
-                    class="flex justify-between text-sm pt-1 border-t first:pt-0 first:border-t-0">
-                    <span class="text-gray-700">${player.name}</span>
-                    <span class="text-gray-900 font-bold">${player.score}</span>
-                  </div>
-                `
-              )}
+        <div class="grid grid-cols-[1fr_auto] auto-rows-min items-start">
+          <div class="col-start-1 col-span-1">
+            <div class="flex gap-md justify-between items-center">
+              <h3 class="font-semibold text-lg text-gray-dark">${this.game.name}</h3>
             </div>
-
-            ${this.game.targetScore
-              ? html` <p class="text-xs text-blue-600">Target: ${this.game.targetScore} points</p> `
-              : html` <p class="text-xs text-gray-500">Open-ended game</p> `}
-
-            ${this.game.timeLimit
-              ? html`
-                  <p class="text-xs ${this.game.timeRemaining && this.game.timeRemaining > 0 ? 'text-orange-600' : 'text-red-600'} flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    ${this.game.timeRemaining && this.game.timeRemaining > 0
-                      ? html`${this.formatTime(this.game.timeRemaining)} remaining`
-                      : html`Time expired`}
-                  </p>
-                `
-              : ''}
+            <div class="flex gap-md items-baseline mb-sm">
+              <p class="text-xs ${this.hasTargetScore ? "text-primary" : "text-gray-500"}">
+                ${this.targetScoreMessage}
+              </p>
+              ${this.game.timeLimit
+                ? html`
+                    <p
+                      class="text-xs ${this.game.timeRemaining && this.game.timeRemaining > 0
+                        ? "text-warning"
+                        : "text-error"} flex items-baseline gap-1">
+                      <svg
+                        class="w-3 h-3 relative top-0.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      ${this.game.timeRemaining && this.game.timeRemaining > 0
+                        ? html`${this.formatTime(this.game.timeRemaining)} remaining`
+                        : html`Time expired`}
+                    </p>
+                  `
+                : nothing}
+            </div>
           </div>
-
-          <div class="flex items-center gap-2 ml-4">
+          <div
+            class="col-start-1 row-start-2 col-span-2 grid grid-cols-[repeat(auto-fit,minmax(33.3%,1fr))] gap-lg py-sm border-t border-t-gray w-full">
+            ${this.getPlayersWithScores(this.game).map(
+              (player) => html`
+                <div class="flex justify-between text-sm pt-1">
+                  <span class="text-gray-700">${player.name}</span>
+                  <span class="text-gray-900 font-bold">${player.score}</span>
+                </div>
+              `
+            )}
+          </div>
+          <div class="col-start-2 row-start-1 row-span-2 flex items-center gap-2 ml-4">
             <button
               @click="${this.deleteGame}"
-              class="w-8 h-8 text-gray-400 hover:text-red-600 hover:bg-red-100 rounded-full flex items-center justify-center"
+              class="btn btn-sm btn-error rounded-full flex items-center justify-center"
               title="Delete game">
-              🗑️
+              Delete
             </button>
-            <div class="text-gray-400">→</div>
           </div>
         </div>
       </div>
