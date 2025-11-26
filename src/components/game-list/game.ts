@@ -77,7 +77,20 @@ export class GameListGameComponent extends BaseComponent {
         @click="${this.selectGame}">
         <div class="flex items-start justify-between">
           <div class="flex-1">
-            <h3 class="font-semibold text-lg text-gray-dark mb-md">${this.game.name}</h3>
+            <div class="flex items-center gap-2 mb-md">
+              <h3 class="font-semibold text-lg text-gray-dark">${this.game.name}</h3>
+              ${this.game.status === 'completed'
+                ? html`
+                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                      </svg>
+                      Completed
+                    </span>
+                  `
+                : ''
+              }
+            </div>
 
             <!-- Player Scores List -->
             <div class="space-y-1 mb-2 w-min min-w-[150px] p-2 bg-blue-100 rounded">

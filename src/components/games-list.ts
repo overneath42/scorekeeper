@@ -33,9 +33,50 @@ export class GamesListComponent extends BaseComponent {
       `;
     }
 
+    // Split games into In Progress (active + paused) and Completed
+    const inProgressGames = games
+      .filter((game) => game.status === "active" || game.status === "paused")
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+    const completedGames = games
+      .filter((game) => game.status === "completed")
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
     return html`
-      <div class="space-y-md" @delete-game="${this.handleDeleteGame}">
-        ${games.map((game) => html` <x-game-list-game .game="${game}"></x-game-list-game> `)}
+      <div
+        class="h-full flex flex-col lg:flex-row"
+        @delete-game="${this.handleDeleteGame}">
+        <!-- In Progress Section -->
+        <div class="flex flex-col flex-[2] lg:flex-1 min-h-0 border-b lg:border-b-0 lg:border-r">
+          <h2 class="text-lg font-semibold px-md py-sm bg-gray-100 border-b sticky top-0 z-10">
+            In Progress
+          </h2>
+          <div class="flex-1 overflow-y-auto">
+            ${inProgressGames.length === 0
+              ? html`<div class="text-center py-8 text-gray-500">No games in progress</div>`
+              : html`<div class="space-y-md">
+                  ${inProgressGames.map(
+                    (game) => html` <x-game-list-game .game="${game}"></x-game-list-game> `
+                  )}
+                </div>`}
+          </div>
+        </div>
+
+        <!-- Completed Section -->
+        <div class="flex flex-col flex-1 min-h-0">
+          <h2 class="text-lg font-semibold px-md py-sm bg-gray-100 border-b sticky top-0 z-10">
+            Completed
+          </h2>
+          <div class="flex-1 overflow-y-auto">
+            ${completedGames.length === 0
+              ? html`<div class="text-center py-8 text-gray-500">No completed games</div>`
+              : html`<div class="space-y-md">
+                  ${completedGames.map(
+                    (game) => html` <x-game-list-game .game="${game}"></x-game-list-game> `
+                  )}
+                </div>`}
+          </div>
+        </div>
       </div>
     `;
   }
