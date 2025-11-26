@@ -44,10 +44,10 @@ export class GamesListComponent extends BaseComponent {
 
     return html`
       <div
-        class="h-full flex flex-col lg:flex-row"
+        class="h-full flex flex-col md:flex-row"
         @delete-game="${this.handleDeleteGame}">
         <!-- In Progress Section -->
-        <div class="flex flex-col flex-[2] lg:flex-1 min-h-0 border-b lg:border-b-0 lg:border-r">
+        <div class="flex flex-col flex-[1.5] md:flex-1 min-h-0 border-b md:border-b-0 md:border-r">
           <h2 class="text-lg font-semibold px-md py-sm bg-gray-100 border-b sticky top-0 z-10">
             In Progress
           </h2>
