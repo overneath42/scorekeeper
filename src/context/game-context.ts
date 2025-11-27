@@ -11,6 +11,12 @@ export interface GameContext extends StoredGame {
   isCurrentWinner: (playerIndex: number) => boolean;
   loadGameById: (gameId: string) => void;
   isTied: boolean;
+
+  // Turn tracking methods
+  canPlayerScore: (playerIndex: number) => boolean;
+  getCurrentPlayerIndex: () => number | null;
+  getCurrentTurnNumber: () => number | null;
+  hasTurnTracking: () => boolean;
 }
 
 export const gameContext = createContext<GameContext>(Symbol("game-context"));

@@ -77,6 +77,13 @@ export class GameListGameComponent extends BaseComponent {
     return `Points To Win: ${this.game.targetScore}`;
   }
 
+  private get currentPlayerName(): string | null {
+    if (!this.game?.turnTrackingEnabled) return null;
+    if (this.game.currentPlayerIndex === undefined || this.game.currentPlayerIndex === null) return null;
+    const currentPlayer = this.game.players[this.game.currentPlayerIndex];
+    return currentPlayer?.name ?? null;
+  }
+
   render() {
     if (!this.game) {
       return html`<div>Loading...</div>`;
@@ -95,6 +102,13 @@ export class GameListGameComponent extends BaseComponent {
               <p class="text-xs ${this.hasTargetScore ? "text-primary" : "text-gray-500"}">
                 ${this.targetScoreMessage}
               </p>
+              ${this.currentPlayerName
+                ? html`
+                    <p class="text-xs text-blue-600 font-medium">
+                      Current: ${this.currentPlayerName}
+                    </p>
+                  `
+                : nothing}
               ${this.game.timeLimit
                 ? html`
                     <p
