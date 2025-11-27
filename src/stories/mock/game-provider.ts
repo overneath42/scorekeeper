@@ -64,6 +64,11 @@ export class MockGameProvider extends LitElement {
         return currentScore > Math.max(...otherScores);
       },
       loadGameById: () => {},
+      // Turn tracking methods (not enabled in mock by default)
+      canPlayerScore: () => true,
+      getCurrentPlayerIndex: () => null,
+      getCurrentTurnNumber: () => null,
+      hasTurnTracking: () => false,
     };
     return mockGame;
   }

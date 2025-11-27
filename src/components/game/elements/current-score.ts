@@ -49,15 +49,22 @@ export class CurrentScoreComponent extends BaseComponent {
   }
 
   /** Class for the container element */
-  private getContainerClass(isGameComplete: boolean): string {
+  private getContainerClass(isGameComplete: boolean, isCurrentTurn: boolean, hasTurnTracking: boolean): string {
     return classNames("player-current-score border-t bg-gray-light flex gap-4 items-baseline", {
-      "cursor-not-allowed opacity-50": isGameComplete,
-      "cursor-pointer hover:bg-gray-200 transition-colors": !isGameComplete,
+      "cursor-not-allowed opacity-50": isGameComplete || (hasTurnTracking && !isCurrentTurn),
+      "cursor-pointer hover:bg-gray-200 transition-colors": !isGameComplete && (!hasTurnTracking || isCurrentTurn),
+      // Highlight current player's turn
+      "bg-yellow-50": hasTurnTracking && isCurrentTurn && !isGameComplete,
     });
   }
 
   /** Handle score click to show popover */
   private handleScoreClick = () => {
+    // Block popover if this player cannot score (turn enforcement)
+    if (this.game && !this.game.canPlayerScore(this.playerIndex)) {
+      return;
+    }
+
     if (this.scoreRef.value) {
       const popover = document.querySelector("x-score-popover") as {
         playerIndex: number;
@@ -83,12 +90,24 @@ export class CurrentScoreComponent extends BaseComponent {
     const label = this.computeLabel(isWinner, isTied, isGameComplete);
     const currentScore = this.getCurrentScore();
 
+    // Turn tracking state
+    const hasTurnTracking = this.game?.hasTurnTracking() ?? false;
+    const isCurrentTurn = this.game?.canPlayerScore(this.playerIndex) ?? false;
+
+    // Dynamic title based on turn state
+    let title = "Tap to add score";
+    if (isGameComplete) {
+      title = "Game is complete - scoring disabled";
+    } else if (hasTurnTracking && !isCurrentTurn) {
+      title = "Not your turn";
+    }
+
     return html`
       <div
         ${ref(this.scoreRef)}
-        class="${this.getContainerClass(isGameComplete)}"
-        @click=${isGameComplete ? undefined : this.handleScoreClick}
-        title="${isGameComplete ? 'Game is complete - scoring disabled' : 'Tap to add score'}"
+        class="${this.getContainerClass(isGameComplete, isCurrentTurn, hasTurnTracking)}"
+        @click=${(isGameComplete || (hasTurnTracking && !isCurrentTurn)) ? undefined : this.handleScoreClick}
+        title="${title}"
       >
         ${this.renderLabel(label, isWinner, isTied)}
         <span class="${this.getScoreClass(isWinner)}">${currentScore}</span>

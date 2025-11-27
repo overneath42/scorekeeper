@@ -219,6 +219,32 @@ export class GameProviderComponent extends BaseComponent {
     return currentWinners.length > 1;
   }
 
+  // Turn tracking methods
+  private hasTurnTracking = (): boolean => {
+    return this.game.turnTrackingEnabled === true;
+  };
+
+  private getCurrentPlayerIndex = (): number | null => {
+    if (!this.hasTurnTracking()) return null;
+    return this.game.currentPlayerIndex ?? null;
+  };
+
+  private getCurrentTurnNumber = (): number | null => {
+    if (!this.hasTurnTracking()) return null;
+    return this.game.currentTurnNumber ?? null;
+  };
+
+  private canPlayerScore = (playerIndex: number): boolean => {
+    // Completed games: no scoring
+    if (this.game.status === "completed") return false;
+
+    // No turn tracking: anyone can score
+    if (!this.hasTurnTracking()) return true;
+
+    // Turn tracking: only current player can score
+    return this.getCurrentPlayerIndex() === playerIndex;
+  };
+
   /**
    * Loads a stored game into the current game state, attaching relevant game methods to the loaded object.
    *
@@ -243,6 +269,11 @@ export class GameProviderComponent extends BaseComponent {
       isCurrentWinner: this.isCurrentWinner,
       loadGameById: this.loadGameById,
       isTied: this.gameIsTied,
+      // Turn tracking methods
+      canPlayerScore: this.canPlayerScore,
+      getCurrentPlayerIndex: this.getCurrentPlayerIndex,
+      getCurrentTurnNumber: this.getCurrentTurnNumber,
+      hasTurnTracking: this.hasTurnTracking,
     };
 
     // Start timer if this is a timed, active game
@@ -295,6 +326,11 @@ export class GameProviderComponent extends BaseComponent {
     isCurrentWinner: this.isCurrentWinner,
     loadGameById: this.loadGameById,
     isTied: this.gameIsTied,
+    // Turn tracking methods
+    canPlayerScore: this.canPlayerScore,
+    getCurrentPlayerIndex: this.getCurrentPlayerIndex,
+    getCurrentTurnNumber: this.getCurrentTurnNumber,
+    hasTurnTracking: this.hasTurnTracking,
   };
 
   render() {

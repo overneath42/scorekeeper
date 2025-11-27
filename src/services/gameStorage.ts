@@ -88,7 +88,8 @@ export class GameStorageService {
     playerNames: string[],
     targetScore: number | null = null,
     timeLimit: number | null = null,
-    timerBehavior: 'no-winner' | 'highest-score' | null = null
+    timerBehavior: 'no-winner' | 'highest-score' | null = null,
+    turnTrackingEnabled: boolean = true
   ): StoredGame {
     const now = new Date();
     const id = generateUUID();
@@ -113,6 +114,10 @@ export class GameStorageService {
       createdAt: now,
       updatedAt: now,
       status: "active",
+      // Turn tracking initialization
+      turnTrackingEnabled,
+      currentPlayerIndex: turnTrackingEnabled ? 0 : undefined,
+      currentTurnNumber: turnTrackingEnabled ? 1 : undefined,
     };
 
     this.saveGame(storedGame);
@@ -125,8 +130,28 @@ export class GameStorageService {
 
     if (playerIndex < 0 || playerIndex >= storedGame.players.length) return false;
 
+    // Turn validation: if turn tracking is enabled, only current player can score
+    if (storedGame.turnTrackingEnabled && storedGame.currentPlayerIndex !== playerIndex) {
+      console.warn(
+        `Turn validation failed: expected player ${storedGame.currentPlayerIndex}, got ${playerIndex}`
+      );
+      return false;
+    }
+
     const scoreEntry: ScoreEntry = [playerIndex, score];
     storedGame.scoringHistory.push(scoreEntry);
+
+    // Turn advancement: if turn tracking is enabled, advance to next player
+    if (storedGame.turnTrackingEnabled) {
+      const nextPlayerIndex = (playerIndex + 1) % storedGame.players.length;
+      storedGame.currentPlayerIndex = nextPlayerIndex;
+
+      // Increment turn number when wrapping back to first player
+      if (nextPlayerIndex === 0) {
+        storedGame.currentTurnNumber = (storedGame.currentTurnNumber ?? 1) + 1;
+      }
+    }
+
     return this.saveGame(storedGame);
   }
 

@@ -46,6 +46,10 @@ export class GameDetailFormComponent extends BaseComponent {
   @state()
   timerBehavior: 'no-winner' | 'highest-score' | null = null;
 
+  @property({ type: Boolean })
+  @state()
+  turnTrackingEnabled: boolean = true;
+
   @property({ type: String, attribute: "context" })
   context: GameFormContext = "create";
 
@@ -60,6 +64,10 @@ export class GameDetailFormComponent extends BaseComponent {
   }
 
   get canChangeTimeSettings() {
+    return (this.game?.scoringHistory ?? []).length === 0;
+  }
+
+  get canChangeTurnTracking() {
     return (this.game?.scoringHistory ?? []).length === 0;
   }
 
@@ -90,6 +98,9 @@ export class GameDetailFormComponent extends BaseComponent {
           this.minutes = totalMinutes % 60;
           this.timerBehavior = storedGame.timerBehavior;
         }
+
+        // Populate turn tracking
+        this.turnTrackingEnabled = storedGame.turnTrackingEnabled ?? false;
       } else {
         console.warn(`No stored game found with ID: ${id}`);
       }
@@ -126,7 +137,8 @@ export class GameDetailFormComponent extends BaseComponent {
       this.players,
       this.targetScore,
       timeLimit,
-      timerBehavior
+      timerBehavior,
+      this.turnTrackingEnabled
     );
     this.gameList?.addGame(game);
     this.redirectToGameboard(game.id);
@@ -157,6 +169,7 @@ export class GameDetailFormComponent extends BaseComponent {
           timeLimit,
           timeRemaining: timeLimit,
           timerBehavior,
+          turnTrackingEnabled: this.turnTrackingEnabled,
           updatedAt: new Date(),
         };
 
@@ -211,6 +224,11 @@ export class GameDetailFormComponent extends BaseComponent {
     this.timerBehavior = input.value as 'no-winner' | 'highest-score';
   }
 
+  private handleTurnTrackingToggle(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.turnTrackingEnabled = input.checked;
+  }
+
   private redirectToGameboard(gameId: string) {
     const url = new URL("/pages/play.html", window.location.href);
     url.searchParams.set("id", gameId);
@@ -258,6 +276,24 @@ export class GameDetailFormComponent extends BaseComponent {
               .value=${this.targetScore !== null ? String(this.targetScore) : ""}
               @input="${this.handleTargetScoreInput}" />
             <p class="form-help-text">Optional - leave blank for open-ended games</p>
+          </div>
+          <!-- Turn Tracking Field -->
+          <div class="form-group">
+            <label class="flex items-center gap-2 ${this.canChangeTurnTracking ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
+              <input
+                type="checkbox"
+                id="turn-tracking"
+                name="turnTracking"
+                .checked=${this.turnTrackingEnabled}
+                ?disabled=${!this.canChangeTurnTracking}
+                @change="${this.handleTurnTrackingToggle}"
+                class="w-4 h-4" />
+              <span class="form-label mb-0">Turn-based Scoring</span>
+            </label>
+            <p class="form-help-text">Players take turns scoring in order</p>
+            ${!this.canChangeTurnTracking ? html`
+              <p class="form-help-text text-orange-600">Turn tracking cannot be changed after scoring begins</p>
+            ` : ''}
           </div>
           <!-- Timed Game Field -->
           <div class="form-group">
