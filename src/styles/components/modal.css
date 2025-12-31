@@ -1,0 +1,35 @@
+/* Modal backdrop animation */
+dialog::backdrop {
+  animation: fadeIn 0.2s ease-out;
+}
+
+dialog[open] {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog::backdrop,
+  dialog[open] {
+    animation: none;
+  }
+}
