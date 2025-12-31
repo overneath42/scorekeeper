@@ -70,7 +70,7 @@ export class GameHeaderComponent extends BaseComponent {
 
     return html`
       <header
-        class="grid grid-cols-2 grid-rows-2 lg:grid-cols-3 lg:grid-rows-1 border-b-2 p-2 gap-y-2 flex-shrink-0 bg-gray-light">
+        class="grid grid-cols-2 auto-rows-min md:grid-cols-[1fr_3fr_1fr] md:auto-rows-min lg:grid-cols-3 lg:grid-rows-1 border-b-2 p-2 gap-y-2 flex-shrink-0 bg-gray-light">
         <a
           href="${this.backUrl}"
           class="col-start-1 row-start-1 self-baseline justify-self-start btn-sm btn-secondary-outline">
@@ -78,25 +78,30 @@ export class GameHeaderComponent extends BaseComponent {
         </a>
         <button
           type="button"
-          class="col-start-2 row-start-1 self-baseline justify-self-end lg:col-start-3 btn-sm btn-secondary"
+          class="col-start-2 row-start-1 self-baseline justify-self-end md:col-start-3 btn-sm btn-secondary"
           @click="${this.handleEditGame}">
           Edit
         </button>
-        <div class="row-start-2 col-span-2 lg:row-start-1 lg:col-span-1 lg:col-start-2 self-center flex flex-col gap-sm">
+        <div
+          class="row-start-2 col-span-2 md:row-start-1 md:col-span-1 md:col-start-2 self-center flex flex-col gap-sm">
           <h1 class="text-center text-3xl font-semibold">${this.title}</h1>
-          <div class="flex justify-center items-center gap-md lg:gap-lg">
-            ${this.startedOn ? html`<p class="text-center">${this.startedOn}</p>` : nothing}
+          <div class="grid auto-cols-auto auto-rows-min gap-sm mx-auto w-full max-w-[475px]">
+            ${this.startedOn
+              ? html`<p class="text-center row-start-1 col-span-3">${this.startedOn}</p>`
+              : nothing}
             ${this.game?.timeLimit ? html`<x-game-timer></x-game-timer>` : nothing}
             ${hasTurnTracking && currentTurnNumber !== null
               ? html`
-                  <div class="flex items-center gap-sm">
-                    <p class="text-lg whitespace-nowrap font-semibold">Turn ${currentTurnNumber}</p>
-                    ${currentPlayerName
-                      ? html`
-                          <p class="text-base  whitespace-nowrap">Current Player: ${currentPlayerName}</p>
-                        `
-                      : nothing}
-                  </div>
+                  <p class="text-lg whitespace-nowrap text-center font-semibold">
+                    Turn ${currentTurnNumber}
+                  </p>
+                  ${currentPlayerName
+                    ? html`
+                        <p class="text-base text-center whitespace-nowrap">
+                          Current Player: <span class="font-semibold">${currentPlayerName}</span>
+                        </p>
+                      `
+                    : nothing}
                 `
               : nothing}
           </div>
