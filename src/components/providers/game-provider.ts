@@ -23,7 +23,7 @@ export class GameProviderComponent extends BaseComponent {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.stopTimer();
+    this.stopTimer(true);
     document.removeEventListener("visibilitychange", this.handleVisibilityChange);
   }
 
@@ -50,8 +50,13 @@ export class GameProviderComponent extends BaseComponent {
     this.timerInterval = window.setInterval(() => this.tickTimer(), 1000);
   }
 
-  private stopTimer() {
+  private stopTimer(withFinalSave: boolean = false) {
     if (this.timerInterval !== null) {
+      // Save current state before stopping if requested
+      if (withFinalSave && this.currentGameId && this.game.timeRemaining !== null) {
+        this.storage.updateTimeRemaining(this.currentGameId, this.game.timeRemaining);
+      }
+
       window.clearInterval(this.timerInterval);
       this.timerInterval = null;
     }
