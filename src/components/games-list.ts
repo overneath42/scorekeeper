@@ -1,9 +1,12 @@
 import { html } from "lit";
 import { consume } from "@lit/context";
 import { customElement, property } from "lit/decorators.js";
+import { createRef, ref, Ref } from "lit/directives/ref.js";
 
 import { gameListContext, type GameListContext } from "@/context";
 import { BaseComponent } from "@/utils";
+import type { ModalComponent } from "@/components/modal/modal.js";
+import type { StoredGame } from "@/services";
 
 @customElement("x-games-list")
 export class GamesListComponent extends BaseComponent {
@@ -11,9 +14,53 @@ export class GamesListComponent extends BaseComponent {
   @property({ attribute: false })
   gameList?: GameListContext;
 
-  private handleDeleteGame(event: CustomEvent) {
-    const gameId = event.detail.gameId;
-    this.gameList?.removeGame(gameId);
+  private modalRef: Ref<ModalComponent> = createRef();
+  private gameToDelete?: StoredGame;
+
+  private handleDeleteRequest(event: CustomEvent) {
+    this.gameToDelete = event.detail.game;
+    this.showDeleteConfirmation();
+  }
+
+  private showDeleteConfirmation() {
+    if (!this.gameToDelete) return;
+
+    this.modalRef.value?.open({
+      title: "Delete Game",
+      content: html`
+        <p class="mb-4">
+          Are you sure you want to delete "${this.gameToDelete.name}"? This action cannot be undone.
+        </p>
+        <div class="flex gap-2 justify-end">
+          <button
+            type="button"
+            @click=${() => this.modalRef.value?.close()}
+            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            @click=${() => this.confirmDelete()}
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Delete
+          </button>
+        </div>
+      `,
+      size: "sm",
+      onClose: () => {
+        this.gameToDelete = undefined;
+      },
+    });
+  }
+
+  private confirmDelete() {
+    if (!this.gameToDelete) return;
+
+    this.gameList?.removeGame(this.gameToDelete.id);
+    this.gameToDelete = undefined;
+    this.modalRef.value?.close();
     this.requestUpdate();
   }
 
@@ -45,7 +92,7 @@ export class GamesListComponent extends BaseComponent {
     return html`
       <div
         class="h-full flex flex-col md:flex-row"
-        @delete-game="${this.handleDeleteGame}">
+        @request-delete="${this.handleDeleteRequest}">
         <!-- In Progress Section -->
         <div class="flex flex-col flex-[1.5] md:flex-1 min-h-0 border-b md:border-b-0 md:border-r">
           <h2 class="text-lg font-semibold px-md py-sm bg-gray-100 border-b sticky top-0 z-10">
@@ -78,6 +125,7 @@ export class GamesListComponent extends BaseComponent {
           </div>
         </div>
       </div>
+      <x-modal ${ref(this.modalRef)}></x-modal>
     `;
   }
 }
