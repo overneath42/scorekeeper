@@ -48,6 +48,15 @@ export class GameHeaderComponent extends BaseComponent {
     return `Started on ${dateString}`;
   }
 
+  get headerColumnCount() {
+    const hasTimeLimit = this.game?.timeLimit;
+    const hasTurnTracking = this.game?.hasTurnTracking();
+
+    if (hasTimeLimit && hasTurnTracking) return 3;
+    if (hasTurnTracking) return 2;
+    return 1;
+  }
+
   handleEditGame() {
     const url = new URL("edit.html", window.location.href);
     if (this.game && this.game.id) {
@@ -70,7 +79,7 @@ export class GameHeaderComponent extends BaseComponent {
 
     return html`
       <header
-        class="grid grid-cols-2 auto-rows-min md:grid-cols-[1fr_3fr_1fr] md:auto-rows-min lg:grid-cols-3 lg:grid-rows-1 border-b-2 p-2 gap-y-2 flex-shrink-0 bg-gray-light">
+        class="grid grid-cols-2 auto-rows-min md:grid-cols-[1fr_3fr_1fr] md:auto-rows-min lg:grid-rows-1 border-b-2 p-2 gap-y-2 flex-shrink-0 bg-gray-light">
         <a
           href="${this.backUrl}"
           class="col-start-1 row-start-1 self-baseline justify-self-start btn-sm btn-secondary-outline">
@@ -87,7 +96,9 @@ export class GameHeaderComponent extends BaseComponent {
           <h1 class="text-center text-3xl font-semibold">${this.title}</h1>
           <div class="grid auto-cols-auto auto-rows-min gap-sm mx-auto w-full max-w-[475px]">
             ${this.startedOn
-              ? html`<p class="text-center row-start-1 col-span-3">${this.startedOn}</p>`
+              ? html`<p class="text-center row-start-1 col-span-${this.headerColumnCount}">
+                  ${this.startedOn}
+                </p>`
               : nothing}
             ${this.game?.timeLimit ? html`<x-game-timer></x-game-timer>` : nothing}
             ${hasTurnTracking && currentTurnNumber !== null
