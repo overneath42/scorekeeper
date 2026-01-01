@@ -48,9 +48,18 @@ export class ModalComponent extends BaseComponent {
     const dialog = this.dialogRef.value;
     if (!dialog) return;
 
+    // Close the dialog - this starts the CSS exit transition
     dialog.close();
-    this.config?.onClose?.();
-    this.config = undefined;
+
+    // Wait for transition to complete before clearing config
+    // This keeps the DOM intact while the exit animation plays
+    const onTransitionEnd = () => {
+      dialog.removeEventListener("transitionend", onTransitionEnd);
+      this.config?.onClose?.();
+      this.config = undefined;
+    };
+
+    dialog.addEventListener("transitionend", onTransitionEnd);
   }
 
   isOpen(): boolean {
@@ -64,14 +73,17 @@ export class ModalComponent extends BaseComponent {
     }
   };
 
-  private handleDialogClose = (): void => {
-    this.config?.onClose?.();
-    this.config = undefined;
+  private handleDialogCancel = (e: Event): void => {
+    // Prevent native cancel (from Escape) - we handle it in keydown
+    e.preventDefault();
   };
 
   private handleKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === "Escape" && this.config?.closeOnEscape === false) {
-      e.preventDefault();
+    if (e.key === "Escape") {
+      e.preventDefault(); // Always prevent native close to use our animated close
+      if (this.config?.closeOnEscape !== false) {
+        this.close();
+      }
     }
   };
 
@@ -93,36 +105,28 @@ export class ModalComponent extends BaseComponent {
       <dialog
         ${ref(this.dialogRef)}
         @click=${this.handleDialogClick}
-        @close=${this.handleDialogClose}
+        @cancel=${this.handleDialogCancel}
         @keydown=${this.handleKeyDown}
-        class="fixed m-0 p-0 border-0 bg-transparent max-w-full max-h-full backdrop:bg-black backdrop:bg-opacity-50"
-      >
+        class="fixed m-0 p-0 border-0 bg-transparent max-w-full max-h-full w-full h-full flex items-center justify-center">
         <div
-          class="${sizeClass} max-sm:w-[95vw] bg-white rounded-xl shadow-2xl flex flex-col max-h-[90vh] border border-gray-200"
-        >
+          class="${sizeClass} max-sm:w-[95vw] bg-white rounded-xl shadow-2xl flex flex-col max-h-[90vh] border border-gray-200">
           ${this.config.title
             ? html`
                 <div
-                  class="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0"
-                >
-                  <h2 class="text-2xl font-bold text-gray-900 m-0">
-                    ${this.config.title}
-                  </h2>
+                  class="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+                  <h2 class="text-2xl font-bold text-gray-900 m-0">${this.config.title}</h2>
                   <button
                     type="button"
                     @click=${this.close}
                     class="text-gray-400 hover:text-gray-600 text-3xl font-light leading-none w-8 h-8 flex items-center justify-center transition-colors cursor-pointer bg-transparent border-0 p-0 hover:bg-gray-100 hover:rounded"
-                    aria-label="Close"
-                  >
+                    aria-label="Close">
                     ×
                   </button>
                 </div>
               `
             : ""}
 
-          <div class="p-6 overflow-y-auto flex-1 text-gray-700">
-            ${this.config.content}
-          </div>
+          <div class="p-6 overflow-y-auto flex-1 text-gray-700">${this.config.content}</div>
         </div>
       </dialog>
     `;
