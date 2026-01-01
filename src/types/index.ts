@@ -19,4 +19,8 @@ export interface Game {
   turnTrackingEnabled?: boolean;    // Feature flag
   currentPlayerIndex?: number;      // 0-based index of whose turn it is
   currentTurnNumber?: number;       // 1-based turn counter for display
+
+  // Quick score mode (optional)
+  quickScoreValues?: number[];      // If set, show as prominent quick buttons (e.g., [1, -1] or [1, 2, 5])
+  hideHistory?: boolean;            // If true, hide the detailed score history (show totals only)
 }

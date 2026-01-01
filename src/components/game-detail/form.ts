@@ -50,6 +50,18 @@ export class GameDetailFormComponent extends BaseComponent {
   @state()
   turnTrackingEnabled: boolean = true;
 
+  @property({ type: Array })
+  @state()
+  quickScoreValues: number[] = [];
+
+  @property({ type: Boolean })
+  @state()
+  enableQuickScore: boolean = false;
+
+  @property({ type: Boolean })
+  @state()
+  hideHistory: boolean = false;
+
   @property({ type: String, attribute: "context" })
   context: GameFormContext = "create";
 
@@ -101,6 +113,13 @@ export class GameDetailFormComponent extends BaseComponent {
 
         // Populate turn tracking
         this.turnTrackingEnabled = storedGame.turnTrackingEnabled ?? false;
+
+        // Populate quick score settings
+        if (storedGame.quickScoreValues && storedGame.quickScoreValues.length > 0) {
+          this.enableQuickScore = true;
+          this.quickScoreValues = storedGame.quickScoreValues;
+        }
+        this.hideHistory = storedGame.hideHistory ?? false;
       } else {
         console.warn(`No stored game found with ID: ${id}`);
       }
@@ -138,7 +157,9 @@ export class GameDetailFormComponent extends BaseComponent {
       this.targetScore,
       timeLimit,
       timerBehavior,
-      this.turnTrackingEnabled
+      this.turnTrackingEnabled,
+      this.enableQuickScore ? this.quickScoreValues : undefined,
+      this.hideHistory
     );
     this.gameList?.addGame(game);
     this.redirectToGameboard(game.id);
@@ -170,6 +191,8 @@ export class GameDetailFormComponent extends BaseComponent {
           timeRemaining: timeLimit,
           timerBehavior,
           turnTrackingEnabled: this.turnTrackingEnabled,
+          quickScoreValues: this.enableQuickScore ? this.quickScoreValues : undefined,
+          hideHistory: this.hideHistory,
           updatedAt: new Date(),
         };
 
@@ -227,6 +250,29 @@ export class GameDetailFormComponent extends BaseComponent {
   private handleTurnTrackingToggle(e: Event) {
     const input = e.target as HTMLInputElement;
     this.turnTrackingEnabled = input.checked;
+  }
+
+  private handleQuickScoreToggle(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.enableQuickScore = input.checked;
+    if (this.enableQuickScore && this.quickScoreValues.length === 0) {
+      // Default to [1, -1] for simple counter mode
+      this.quickScoreValues = [1, -1];
+    }
+  }
+
+  private handleQuickScoreValuesInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const values = input.value
+      .split(',')
+      .map(v => parseInt(v.trim()))
+      .filter(v => !isNaN(v));
+    this.quickScoreValues = values;
+  }
+
+  private handleHideHistoryToggle(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.hideHistory = input.checked;
   }
 
   private redirectToGameboard(gameId: string) {
@@ -295,6 +341,47 @@ export class GameDetailFormComponent extends BaseComponent {
               <p class="form-help-text text-orange-600">Turn tracking cannot be changed after scoring begins</p>
             ` : ''}
           </div>
+          <!-- Quick Score Mode Field -->
+          <div class="form-group">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                id="quick-score"
+                name="quickScore"
+                .checked=${this.enableQuickScore}
+                @change="${this.handleQuickScoreToggle}"
+                class="w-4 h-4" />
+              <span class="form-label mb-0">Quick Score Buttons</span>
+            </label>
+            <p class="form-help-text">Show prominent buttons for fast scoring</p>
+          </div>
+          ${this.enableQuickScore ? html`
+            <div class="form-group">
+              <label for="quick-score-values" class="form-label">Button Values</label>
+              <input
+                type="text"
+                id="quick-score-values"
+                name="quickScoreValues"
+                class="form-input"
+                placeholder="e.g., 1,-1 or 1,2,5"
+                .value=${this.quickScoreValues.join(',')}
+                @input="${this.handleQuickScoreValuesInput}" />
+              <p class="form-help-text">Comma-separated values (use negative for decrement)</p>
+            </div>
+            <div class="form-group">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="hide-history"
+                  name="hideHistory"
+                  .checked=${this.hideHistory}
+                  @change="${this.handleHideHistoryToggle}"
+                  class="w-4 h-4" />
+                <span class="form-label mb-0">Hide Score History</span>
+              </label>
+              <p class="form-help-text">Show only current totals, not individual scoring entries</p>
+            </div>
+          ` : ''}
           <!-- Timed Game Field -->
           <div class="form-group">
             <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">

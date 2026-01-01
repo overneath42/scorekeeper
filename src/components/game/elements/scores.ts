@@ -21,6 +21,11 @@ export class GameScoresComponent extends BaseComponent {
   }
 
   render() {
+    // Hide score history if the flag is set
+    if (this.game?.hideHistory) {
+      return html``;
+    }
+
     let runningTotal = 0;
     const scores = this.scores;
     const lastIndex = scores.length - 1;

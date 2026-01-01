@@ -89,7 +89,9 @@ export class GameStorageService {
     targetScore: number | null = null,
     timeLimit: number | null = null,
     timerBehavior: 'no-winner' | 'highest-score' | null = null,
-    turnTrackingEnabled: boolean = true
+    turnTrackingEnabled: boolean = true,
+    quickScoreValues?: number[],
+    hideHistory?: boolean
   ): StoredGame {
     const now = new Date();
     const id = generateUUID();
@@ -118,6 +120,9 @@ export class GameStorageService {
       turnTrackingEnabled,
       currentPlayerIndex: turnTrackingEnabled ? 0 : undefined,
       currentTurnNumber: turnTrackingEnabled ? 1 : undefined,
+      // Quick score mode
+      quickScoreValues,
+      hideHistory,
     };
 
     this.saveGame(storedGame);

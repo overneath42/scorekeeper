@@ -77,6 +77,16 @@ export class CurrentScoreComponent extends BaseComponent {
     }
   };
 
+  /** Handle quick score button click */
+  private handleQuickScore = (value: number) => {
+    return (e: Event) => {
+      e.stopPropagation();
+      if (this.game && this.game.canPlayerScore(this.playerIndex)) {
+        this.game.addScore(this.playerIndex, value);
+      }
+    };
+  };
+
   /** Render the winner/leader/tied label */
   private renderLabel(label: string, isWinner: boolean, isTied: boolean) {
     if (!label) return nothing;
@@ -94,14 +104,56 @@ export class CurrentScoreComponent extends BaseComponent {
     const hasTurnTracking = this.game?.hasTurnTracking() ?? false;
     const isCurrentTurn = this.game?.canPlayerScore(this.playerIndex) ?? false;
 
+    // Quick score mode
+    const quickScoreValues = this.game?.quickScoreValues ?? [];
+    const hasQuickScore = quickScoreValues.length > 0;
+
     // Dynamic title based on turn state
-    let title = "Tap to add score";
+    let title = hasQuickScore ? "" : "Tap to add score";
     if (isGameComplete) {
       title = "Game is complete - scoring disabled";
     } else if (hasTurnTracking && !isCurrentTurn) {
       title = "Not your turn";
     }
 
+    // If quick score mode, render buttons layout
+    if (hasQuickScore) {
+      return html`
+        <div
+          ${ref(this.scoreRef)}
+          class="${this.getContainerClass(isGameComplete, isCurrentTurn, hasTurnTracking)} flex-col !cursor-default"
+          title="${title}"
+        >
+          <div class="flex items-baseline gap-2 justify-between w-full">
+            ${this.renderLabel(label, isWinner, isTied)}
+            <span class="${this.getScoreClass(isWinner)}">${currentScore}</span>
+          </div>
+          <div class="flex gap-2 mt-2 justify-center w-full">
+            ${quickScoreValues.map(
+              (value) => html`
+                <button
+                  class="${classNames(
+                    "px-4 py-2 rounded font-bold transition-colors flex-1 min-w-[60px]",
+                    {
+                      "bg-blue-500 hover:bg-blue-600 text-white": value > 0,
+                      "bg-gray-400 hover:bg-gray-500 text-white": value < 0,
+                      "opacity-50 cursor-not-allowed": isGameComplete || (hasTurnTracking && !isCurrentTurn),
+                    }
+                  )}"
+                  @click=${this.handleQuickScore(value)}
+                  ?disabled=${isGameComplete || (hasTurnTracking && !isCurrentTurn)}
+                  title="${value > 0 ? `Add ${value}` : `Remove ${Math.abs(value)}`}"
+                >
+                  ${value > 0 ? "+" : ""}${value}
+                </button>
+              `
+            )}
+          </div>
+        </div>
+      `;
+    }
+
+    // Default mode with popover
     return html`
       <div
         ${ref(this.scoreRef)}
