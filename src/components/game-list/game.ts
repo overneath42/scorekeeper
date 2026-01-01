@@ -16,14 +16,14 @@ export class GameListGameComponent extends BaseComponent {
   private deleteGame(event: Event) {
     event.stopPropagation();
 
-    if (this.game && confirm(`Are you sure you want to delete "${this.game.name}"?`)) {
-      this.dispatchEvent(
-        new CustomEvent("delete-game", {
-          detail: { gameId: this.game.id },
-          bubbles: true,
-        })
-      );
-    }
+    if (!this.game) return;
+
+    this.dispatchEvent(
+      new CustomEvent("request-delete", {
+        detail: { game: this.game },
+        bubbles: true,
+      })
+    );
   }
 
   private getPlayersWithScores(game: Game) {

@@ -1,65 +1,45 @@
 import { consume } from "@lit/context";
 import { html, TemplateResult } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement } from "lit/decorators.js";
 import { createRef, ref, Ref } from "lit/directives/ref.js";
 import { gameContext, type GameContext } from "@/context";
 import { BaseComponent } from "@/utils";
+import type { ModalComponent } from "@/components/modal/modal.js";
 
 @customElement("x-time-expiry-modal")
 export class TimeExpiryModalComponent extends BaseComponent {
   @consume({ context: gameContext, subscribe: true })
   game?: GameContext;
 
-  @state()
-  open: boolean = false;
-
-  @state()
-  hasWinner: boolean = false;
-
-  @state()
-  playerScores: number[] = [];
-
-  modalRef: Ref<HTMLDivElement> = createRef();
+  private hasWinner: boolean = false;
+  private playerScores: number[] = [];
+  private modalRef: Ref<ModalComponent> = createRef();
 
   connectedCallback(): void {
     super.connectedCallback();
-    // Listen for time-expired event from game provider
     document.addEventListener('time-expired', this.handleTimeExpired as (event: Event) => void);
-    this.addEventListener("keydown", this.handleKeydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     document.removeEventListener('time-expired', this.handleTimeExpired as (event: Event) => void);
-    this.removeEventListener("keydown", this.handleKeydown);
-  }
-
-  updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has("open")) {
-      if (this.open) {
-        const modalElement = this.modalRef.value as HTMLElement & { showPopover(): void };
-        modalElement?.showPopover();
-      } else {
-        const modalElement = this.modalRef.value as HTMLElement & { hidePopover(): void };
-        modalElement?.hidePopover();
-      }
-    }
   }
 
   private handleTimeExpired = (event: CustomEvent) => {
     this.hasWinner = event.detail.hasWinner;
     this.playerScores = event.detail.playerScores;
-    this.open = true;
+    this.openModal();
   };
 
-  private handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === "Escape" || event.key === "Enter") {
-      this.closeModal();
-    }
+  private openModal = () => {
+    this.modalRef.value?.open({
+      content: this.renderContent(),
+      size: "sm",
+    });
   };
 
   private closeModal = () => {
-    this.open = false;
+    this.modalRef.value?.close();
   };
 
   private getWinnerMessage(): string {
@@ -90,19 +70,9 @@ export class TimeExpiryModalComponent extends BaseComponent {
     return `Final Score: ${maxScore}`;
   }
 
-  protected render(): TemplateResult {
-    if (!this.open) {
-      return html``;
-    }
-
+  private renderContent(): TemplateResult {
     return html`
-      <div
-        ${ref(this.modalRef)}
-        popover="manual"
-        class="bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-8 z-50 max-w-md"
-        style="position: fixed; top: 50%; left: 50vw; transform: translate(-25vw, -50%);"
-        @click=${(e: Event) => e.stopPropagation()}>
-
+      <div class="text-center">
         <!-- Clock Icon -->
         <div class="flex justify-center mb-6">
           <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
@@ -113,7 +83,7 @@ export class TimeExpiryModalComponent extends BaseComponent {
         </div>
 
         <!-- Title -->
-        <div class="text-center mb-6">
+        <div class="mb-6">
           <h2 class="text-3xl font-bold mb-2 ${this.hasWinner ? 'text-success' : 'text-gray-700'}">
             ${this.getWinnerMessage()}
           </h2>
@@ -123,7 +93,7 @@ export class TimeExpiryModalComponent extends BaseComponent {
         </div>
 
         <!-- Message -->
-        <p class="text-center text-gray-500 mb-6">
+        <p class="text-gray-500 mb-6">
           Time has expired. The game is now complete.
         </p>
 
@@ -135,14 +105,11 @@ export class TimeExpiryModalComponent extends BaseComponent {
           View Final Scores
         </button>
       </div>
-
-      <!-- Backdrop -->
-      <div
-        class="fixed inset-0 bg-black bg-opacity-50 z-40"
-        style="display: ${this.open ? 'block' : 'none'}"
-        @click=${this.closeModal}>
-      </div>
     `;
+  }
+
+  protected render(): TemplateResult {
+    return html`<x-modal ${ref(this.modalRef)}></x-modal>`;
   }
 }
 

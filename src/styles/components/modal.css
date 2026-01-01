@@ -1,0 +1,49 @@
+/* Modal entry and exit animations using modern CSS */
+dialog {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out,
+    overlay 0.3s ease-out allow-discrete,
+    display 0.3s ease-out allow-discrete;
+}
+
+dialog[open] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Entry animation starting state */
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* Backdrop animations */
+dialog::backdrop {
+  background-color: rgb(0 0 0 / 0);
+  transition:
+    background-color 0.3s ease-out,
+    overlay 0.3s ease-out allow-discrete,
+    display 0.3s ease-out allow-discrete;
+}
+
+dialog[open]::backdrop {
+  background-color: rgb(0 0 0 / 0.5);
+}
+
+@starting-style {
+  dialog[open]::backdrop {
+    background-color: rgb(0 0 0 / 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog,
+  dialog::backdrop {
+    transition: none;
+  }
+}
