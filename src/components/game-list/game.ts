@@ -79,7 +79,8 @@ export class GameListGameComponent extends BaseComponent {
 
   private get currentPlayerName(): string | null {
     if (!this.game?.turnTrackingEnabled) return null;
-    if (this.game.currentPlayerIndex === undefined || this.game.currentPlayerIndex === null) return null;
+    if (this.game.currentPlayerIndex === undefined || this.game.currentPlayerIndex === null)
+      return null;
     const currentPlayer = this.game.players[this.game.currentPlayerIndex];
     return currentPlayer?.name ?? null;
   }
@@ -94,12 +95,15 @@ export class GameListGameComponent extends BaseComponent {
         class="border-b px-md pb-md first:pt-md hover:bg-blue-50 transition-colors cursor-pointer"
         @click="${this.selectGame}">
         <div class="grid grid-cols-[1fr_auto] auto-rows-min items-start">
-          <div class="col-start-1 col-span-1">
+          <div class="col-start-1 col-span-1 @container">
             <div class="flex gap-md justify-between items-center">
               <h3 class="font-semibold text-lg text-gray-dark">${this.game.name}</h3>
             </div>
-            <div class="flex gap-md items-baseline mb-sm">
-              <p class="text-xs ${this.hasTargetScore ? "text-primary" : "text-gray-500"}">
+            <div class="flex flex-wrap gap-x-md items-baseline mb-sm @sm:flex-nowrap @md:gap-x-lg">
+              <p
+                class="text-xs ${this.hasTargetScore
+                  ? "text-secondary font-semibold"
+                  : "text-gray-500"}">
                 ${this.targetScoreMessage}
               </p>
               ${this.currentPlayerName
