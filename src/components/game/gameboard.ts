@@ -1,6 +1,6 @@
 import { consume } from "@lit/context";
 import classNames from "classnames";
-import { html } from "lit";
+import { html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { BaseComponent } from "@/utils/index.js";
 import { type GameContext, gameContext } from "@/context";
@@ -75,6 +75,8 @@ export class GameboardComponent extends BaseComponent {
   }
 
   private renderGame() {
+    const hideHistory = this.game?.hideHistory ?? false;
+
     if (!this.hasGame) {
       return html`
         <div class="flex items-center justify-center h-full text-gray-500">
@@ -102,19 +104,21 @@ export class GameboardComponent extends BaseComponent {
               </div>
             `
           )}
-          <div class="player-score-lists">
-            ${this.players.map(
-              (player, index) => html`
-                <div
-                  class=${classNames("player-score-list", {
-                    "border-r": index < this.players.length - 1,
-                  })}
-                  data-index=${index}>
-                  <x-game-scores player-index="${player.index}"></x-game-scores>
-                </div>
-              `
-            )}
-          </div>
+          ${!hideHistory
+            ? html` <div class="player-score-lists">
+                ${this.players.map(
+                  (player, index) => html`
+                    <div
+                      class=${classNames("player-score-list", {
+                        "border-r": index < this.players.length - 1,
+                      })}
+                      data-index=${index}>
+                      <x-game-scores player-index="${player.index}"></x-game-scores>
+                    </div>
+                  `
+                )}
+              </div>`
+            : nothing}
           <!-- Current Scores -->
           ${this.players.map(
             (player, index) => html`

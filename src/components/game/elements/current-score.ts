@@ -49,13 +49,21 @@ export class CurrentScoreComponent extends BaseComponent {
   }
 
   /** Class for the container element */
-  private getContainerClass(isGameComplete: boolean, isCurrentTurn: boolean, hasTurnTracking: boolean): string {
-    return classNames("player-current-score border-t bg-gray-light flex gap-4 items-baseline", {
-      "cursor-not-allowed opacity-50": isGameComplete || (hasTurnTracking && !isCurrentTurn),
-      "cursor-pointer hover:bg-gray-200 transition-colors": !isGameComplete && (!hasTurnTracking || isCurrentTurn),
-      // Highlight current player's turn
-      "bg-yellow-50": hasTurnTracking && isCurrentTurn && !isGameComplete,
-    });
+  private getContainerClass(
+    isGameComplete: boolean,
+    isCurrentTurn: boolean,
+    hasTurnTracking: boolean
+  ): string {
+    return classNames(
+      "player-current-score border-t bg-gray-light flex gap-sm justify-center items-baseline h-full",
+      {
+        "cursor-not-allowed opacity-50": isGameComplete || (hasTurnTracking && !isCurrentTurn),
+        "cursor-pointer hover:bg-gray-200 transition-colors":
+          !isGameComplete && (!hasTurnTracking || isCurrentTurn),
+        // Highlight current player's turn
+        "bg-yellow-50": hasTurnTracking && isCurrentTurn && !isGameComplete,
+      }
+    );
   }
 
   /** Handle score click to show popover */
@@ -90,7 +98,9 @@ export class CurrentScoreComponent extends BaseComponent {
   /** Render the winner/leader/tied label */
   private renderLabel(label: string, isWinner: boolean, isTied: boolean) {
     if (!label) return nothing;
-    return html`<span class="${this.getWinnerLabelClass(isWinner, isTied)}" title="${label}">${label}</span>`;
+    return html`<span class="${this.getWinnerLabelClass(isWinner, isTied)}" title="${label}"
+      >${label}</span
+    >`;
   }
 
   render() {
@@ -121,29 +131,34 @@ export class CurrentScoreComponent extends BaseComponent {
       return html`
         <div
           ${ref(this.scoreRef)}
-          class="${this.getContainerClass(isGameComplete, isCurrentTurn, hasTurnTracking)} flex-col !cursor-default"
-          title="${title}"
-        >
-          <div class="flex items-baseline gap-2 justify-between w-full">
-            ${this.renderLabel(label, isWinner, isTied)}
-            <span class="${this.getScoreClass(isWinner)}">${currentScore}</span>
+          class="${this.getContainerClass(
+            isGameComplete,
+            isCurrentTurn,
+            hasTurnTracking
+          )} flex-col !cursor-default py-8"
+          title="${title}">
+          <div class="flex flex-col items-center w-full my-auto">
+            <span
+              class="${classNames("text-6xl lg:text-8xl font-bold", {
+                "text-success": isWinner,
+                "text-gray-dark": !isWinner,
+              })}"
+              >${currentScore}</span
+            >
           </div>
-          <div class="flex gap-2 mt-2 justify-center w-full">
+          <div class="flex gap-sm justify-center w-full">
             ${quickScoreValues.map(
               (value) => html`
                 <button
-                  class="${classNames(
-                    "px-4 py-2 rounded font-bold transition-colors flex-1 min-w-[60px]",
-                    {
-                      "bg-blue-500 hover:bg-blue-600 text-white": value > 0,
-                      "bg-gray-400 hover:bg-gray-500 text-white": value < 0,
-                      "opacity-50 cursor-not-allowed": isGameComplete || (hasTurnTracking && !isCurrentTurn),
-                    }
-                  )}"
+                  class="${classNames("btn btn-lg flex-1 min-w-[80px] max-w-[140px]", {
+                    "btn-primary": value > 0,
+                    "btn-secondary": value < 0,
+                    "opacity-50 cursor-not-allowed":
+                      isGameComplete || (hasTurnTracking && !isCurrentTurn),
+                  })}"
                   @click=${this.handleQuickScore(value)}
                   ?disabled=${isGameComplete || (hasTurnTracking && !isCurrentTurn)}
-                  title="${value > 0 ? `Add ${value}` : `Remove ${Math.abs(value)}`}"
-                >
+                  title="${value > 0 ? `Add ${value}` : `Remove ${Math.abs(value)}`}">
                   ${value > 0 ? "+" : ""}${value}
                 </button>
               `
@@ -158,9 +173,10 @@ export class CurrentScoreComponent extends BaseComponent {
       <div
         ${ref(this.scoreRef)}
         class="${this.getContainerClass(isGameComplete, isCurrentTurn, hasTurnTracking)}"
-        @click=${(isGameComplete || (hasTurnTracking && !isCurrentTurn)) ? undefined : this.handleScoreClick}
-        title="${title}"
-      >
+        @click=${isGameComplete || (hasTurnTracking && !isCurrentTurn)
+          ? undefined
+          : this.handleScoreClick}
+        title="${title}">
         ${this.renderLabel(label, isWinner, isTied)}
         <span class="${this.getScoreClass(isWinner)}">${currentScore}</span>
       </div>
