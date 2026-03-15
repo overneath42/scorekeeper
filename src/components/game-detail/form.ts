@@ -221,9 +221,8 @@ export class GameDetailFormComponent extends BaseComponent {
     }
   }
 
-  private handleTemplateSelect(e: Event) {
-    const select = e.target as HTMLSelectElement;
-    this.selectedTemplateId = select.value;
+  private handleTemplateSelect(e: CustomEvent<{ templateId: string }>) {
+    this.selectedTemplateId = e.detail.templateId;
 
     if (!this.selectedTemplateId) {
       this.resetFormToDefaults();
@@ -379,18 +378,14 @@ export class GameDetailFormComponent extends BaseComponent {
             <!-- Template Selector (create mode only, when templates exist) -->
             ${this.context === "create" && this.templates.length > 0 ? html`
               <div class="form-group pt-md">
-                <label for="template-select" class="form-label">Start from Template</label>
+                <label class="form-label">Start from Template</label>
                 <div class="flex gap-2 items-center">
-                  <select
-                    id="template-select"
-                    class="form-input flex-1"
-                    .value=${this.selectedTemplateId}
-                    @change="${this.handleTemplateSelect}">
-                    <option value="">-- No Template --</option>
-                    ${this.templates.map((t) => html`
-                      <option value="${t.id}">${t.templateName}</option>
-                    `)}
-                  </select>
+                  <x-template-select
+                    class="flex-1"
+                    .templates=${this.templates}
+                    .selectedTemplateId=${this.selectedTemplateId}
+                    @template-select=${this.handleTemplateSelect}>
+                  </x-template-select>
                   ${this.selectedTemplateId ? html`
                     <button
                       type="button"
