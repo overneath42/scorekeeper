@@ -249,145 +249,262 @@ export class GameDetailFormComponent extends BaseComponent {
     return html`
       <form @submit="${this.handleSubmit}" class="h-full overflow-hidden flex flex-col gap-md">
         <div class="px-md flex-1 overflow-y-auto">
-          <!-- Game Name Field -->
-          <div class="form-group">
-            <label for="game-name" class="form-label"> Game Name </label>
-            <input
-              type="text"
-              id="game-name"
-              name="name"
-              .value="${this.gameName}"
-              @input="${this.handleGameNameInput}"
-              required
-              class="form-input"
-              placeholder="Enter game name" />
-          </div>
-          <!-- Target Score Field -->
-          <div class="form-group">
-            <label for="target-score" class="form-label"> Target Score </label>
-            <input
-              type="number"
-              id="target-score"
-              name="targetScore"
-              min="1"
-              step="1"
-              class="form-input"
-              placeholder="e.g. 500"
-              .value=${this.targetScore !== null ? String(this.targetScore) : ""}
-              @input="${this.handleTargetScoreInput}" />
-            <p class="form-help-text">Optional - leave blank for open-ended games</p>
-          </div>
-          <!-- Turn Tracking Field -->
-          <div class="form-group">
-            <label class="flex items-center gap-2 ${this.canChangeTurnTracking ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
-              <input
-                type="checkbox"
-                id="turn-tracking"
-                name="turnTracking"
-                .checked=${this.turnTrackingEnabled}
-                ?disabled=${!this.canChangeTurnTracking}
-                @change="${this.handleTurnTrackingToggle}"
-                class="w-4 h-4" />
-              <span class="form-label mb-0">Turn-based Scoring</span>
-            </label>
-            <p class="form-help-text">Players take turns scoring in order</p>
-            ${!this.canChangeTurnTracking ? html`
-              <p class="form-help-text text-orange-600">Turn tracking cannot be changed after scoring begins</p>
-            ` : ''}
-          </div>
-          <!-- Timed Game Field -->
-          <div class="form-group">
-            <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
-              <input
-                type="checkbox"
-                id="timed-game"
-                name="timedGame"
-                .checked=${this.isTimedGame}
-                ?disabled=${!this.canChangeTimeSettings}
-                @change="${this.handleTimedGameToggle}"
-                class="w-4 h-4" />
-              <span class="form-label mb-0">Timed Game</span>
-            </label>
-            ${!this.canChangeTimeSettings ? html`
-              <p class="form-help-text text-orange-600">Timer settings cannot be changed after scoring begins</p>
-            ` : ''}
-          </div>
-          ${this.isTimedGame ? html`
-            <!-- Time Limit Fields -->
-            <div class="form-group">
-              <label class="form-label">Time Limit</label>
-              <div class="flex gap-2">
-                <div class="flex-1">
-                  <input
-                    type="number"
-                    id="hours"
-                    name="hours"
-                    min="0"
-                    step="1"
-                    class="form-input"
-                    placeholder="Hours"
-                    ?disabled=${!this.canChangeTimeSettings}
-                    .value=${this.hours > 0 ? String(this.hours) : ""}
-                    @input="${this.handleHoursInput}" />
-                </div>
-                <div class="flex-1">
-                  <input
-                    type="number"
-                    id="minutes"
-                    name="minutes"
-                    min="0"
-                    max="59"
-                    step="1"
-                    class="form-input"
-                    placeholder="Minutes"
-                    ?disabled=${!this.canChangeTimeSettings}
-                    .value=${this.minutes > 0 ? String(this.minutes) : ""}
-                    @input="${this.handleMinutesInput}" />
-                </div>
-              </div>
-              <p class="form-help-text">Enter at least 1 minute</p>
-            </div>
-            ${this.targetScore !== null ? html`
-              <!-- Timer Behavior Field -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+            <!-- Section A: Basic Fields -->
+            <div class="md:col-span-1 lg:col-span-1 space-y-0">
+              <!-- Game Name Field -->
               <div class="form-group">
-                <label class="form-label">If time expires with no winner</label>
-                <div class="flex flex-col gap-2">
-                  <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
-                    <input
-                      type="radio"
-                      name="timerBehavior"
-                      value="highest-score"
-                      .checked=${this.timerBehavior === 'highest-score'}
-                      ?disabled=${!this.canChangeTimeSettings}
-                      @change="${this.handleTimerBehaviorChange}"
-                      class="w-4 h-4" />
-                    <span>Highest Score Wins</span>
-                  </label>
-                  <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
-                    <input
-                      type="radio"
-                      name="timerBehavior"
-                      value="no-winner"
-                      .checked=${this.timerBehavior === 'no-winner'}
-                      ?disabled=${!this.canChangeTimeSettings}
-                      @change="${this.handleTimerBehaviorChange}"
-                      class="w-4 h-4" />
-                    <span>No Winner</span>
-                  </label>
-                </div>
+                <label for="game-name" class="form-label"> Game Name </label>
+                <input
+                  type="text"
+                  id="game-name"
+                  name="name"
+                  .value="${this.gameName}"
+                  @input="${this.handleGameNameInput}"
+                  required
+                  class="form-input"
+                  placeholder="Enter game name" />
               </div>
-            ` : ''}
-          ` : ''}
-          <!-- Players Field -->
-          <x-game-detail-player-list
-            .players="${this.players}"
-            ?disable-editing="${!this.canChangePlayers}"
-            @players-changed="${this.handlePlayersChanged}"></x-game-detail-player-list>
+              <!-- Target Score Field -->
+              <div class="form-group">
+                <label for="target-score" class="form-label"> Target Score </label>
+                <input
+                  type="number"
+                  id="target-score"
+                  name="targetScore"
+                  min="1"
+                  step="1"
+                  class="form-input"
+                  placeholder="e.g. 500"
+                  .value=${this.targetScore !== null ? String(this.targetScore) : ""}
+                  @input="${this.handleTargetScoreInput}" />
+                <p class="form-help-text">Optional - leave blank for open-ended games</p>
+              </div>
+
+              <!-- Section B fields for medium screens only -->
+              <div class="md:block lg:hidden">
+                <!-- Turn Tracking Field -->
+                <div class="form-group">
+                  <label class="flex items-center gap-2 ${this.canChangeTurnTracking ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
+                    <input
+                      type="checkbox"
+                      id="turn-tracking"
+                      name="turnTracking"
+                      .checked=${this.turnTrackingEnabled}
+                      ?disabled=${!this.canChangeTurnTracking}
+                      @change="${this.handleTurnTrackingToggle}"
+                      class="w-4 h-4" />
+                    <span class="form-label mb-0">Turn-based Scoring</span>
+                  </label>
+                  <p class="form-help-text">Players take turns scoring in order</p>
+                  ${!this.canChangeTurnTracking ? html`
+                    <p class="form-help-text text-orange-600">Turn tracking cannot be changed after scoring begins</p>
+                  ` : ''}
+                </div>
+                <!-- Timed Game Field -->
+                <div class="form-group">
+                  <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
+                    <input
+                      type="checkbox"
+                      id="timed-game"
+                      name="timedGame"
+                      .checked=${this.isTimedGame}
+                      ?disabled=${!this.canChangeTimeSettings}
+                      @change="${this.handleTimedGameToggle}"
+                      class="w-4 h-4" />
+                    <span class="form-label mb-0">Timed Game</span>
+                  </label>
+                  ${!this.canChangeTimeSettings ? html`
+                    <p class="form-help-text text-orange-600">Timer settings cannot be changed after scoring begins</p>
+                  ` : ''}
+                </div>
+                ${this.isTimedGame ? html`
+                  <!-- Time Limit Fields -->
+                  <div class="form-group">
+                    <label class="form-label">Time Limit</label>
+                    <div class="flex gap-2">
+                      <div class="flex-1">
+                        <input
+                          type="number"
+                          id="hours"
+                          name="hours"
+                          min="0"
+                          step="1"
+                          class="form-input"
+                          placeholder="Hours"
+                          ?disabled=${!this.canChangeTimeSettings}
+                          .value=${this.hours > 0 ? String(this.hours) : ""}
+                          @input="${this.handleHoursInput}" />
+                      </div>
+                      <div class="flex-1">
+                        <input
+                          type="number"
+                          id="minutes"
+                          name="minutes"
+                          min="0"
+                          max="59"
+                          step="1"
+                          class="form-input"
+                          placeholder="Minutes"
+                          ?disabled=${!this.canChangeTimeSettings}
+                          .value=${this.minutes > 0 ? String(this.minutes) : ""}
+                          @input="${this.handleMinutesInput}" />
+                      </div>
+                    </div>
+                    <p class="form-help-text">Enter at least 1 minute</p>
+                  </div>
+                  ${this.targetScore !== null ? html`
+                    <!-- Timer Behavior Field -->
+                    <div class="form-group">
+                      <label class="form-label">If time expires with no winner</label>
+                      <div class="flex flex-col gap-2">
+                        <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
+                          <input
+                            type="radio"
+                            name="timerBehavior"
+                            value="highest-score"
+                            .checked=${this.timerBehavior === 'highest-score'}
+                            ?disabled=${!this.canChangeTimeSettings}
+                            @change="${this.handleTimerBehaviorChange}"
+                            class="w-4 h-4" />
+                          <span>Highest Score Wins</span>
+                        </label>
+                        <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
+                          <input
+                            type="radio"
+                            name="timerBehavior"
+                            value="no-winner"
+                            .checked=${this.timerBehavior === 'no-winner'}
+                            ?disabled=${!this.canChangeTimeSettings}
+                            @change="${this.handleTimerBehaviorChange}"
+                            class="w-4 h-4" />
+                          <span>No Winner</span>
+                        </label>
+                      </div>
+                    </div>
+                  ` : ''}
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Section B: Checkbox & Options (large screens only) -->
+            <div class="hidden lg:block space-y-0">
+              <!-- Turn Tracking Field -->
+              <div class="form-group">
+                <label class="flex items-center gap-2 ${this.canChangeTurnTracking ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
+                  <input
+                    type="checkbox"
+                    id="turn-tracking-lg"
+                    name="turnTracking"
+                    .checked=${this.turnTrackingEnabled}
+                    ?disabled=${!this.canChangeTurnTracking}
+                    @change="${this.handleTurnTrackingToggle}"
+                    class="w-4 h-4" />
+                  <span class="form-label mb-0">Turn-based Scoring</span>
+                </label>
+                <p class="form-help-text">Players take turns scoring in order</p>
+                ${!this.canChangeTurnTracking ? html`
+                  <p class="form-help-text text-orange-600">Turn tracking cannot be changed after scoring begins</p>
+                ` : ''}
+              </div>
+              <!-- Timed Game Field -->
+              <div class="form-group">
+                <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
+                  <input
+                    type="checkbox"
+                    id="timed-game-lg"
+                    name="timedGame"
+                    .checked=${this.isTimedGame}
+                    ?disabled=${!this.canChangeTimeSettings}
+                    @change="${this.handleTimedGameToggle}"
+                    class="w-4 h-4" />
+                  <span class="form-label mb-0">Timed Game</span>
+                </label>
+                ${!this.canChangeTimeSettings ? html`
+                  <p class="form-help-text text-orange-600">Timer settings cannot be changed after scoring begins</p>
+                ` : ''}
+              </div>
+              ${this.isTimedGame ? html`
+                <!-- Time Limit Fields -->
+                <div class="form-group">
+                  <label class="form-label">Time Limit</label>
+                  <div class="flex gap-2">
+                    <div class="flex-1">
+                      <input
+                        type="number"
+                        id="hours-lg"
+                        name="hours"
+                        min="0"
+                        step="1"
+                        class="form-input"
+                        placeholder="Hours"
+                        ?disabled=${!this.canChangeTimeSettings}
+                        .value=${this.hours > 0 ? String(this.hours) : ""}
+                        @input="${this.handleHoursInput}" />
+                    </div>
+                    <div class="flex-1">
+                      <input
+                        type="number"
+                        id="minutes-lg"
+                        name="minutes"
+                        min="0"
+                        max="59"
+                        step="1"
+                        class="form-input"
+                        placeholder="Minutes"
+                        ?disabled=${!this.canChangeTimeSettings}
+                        .value=${this.minutes > 0 ? String(this.minutes) : ""}
+                        @input="${this.handleMinutesInput}" />
+                    </div>
+                  </div>
+                  <p class="form-help-text">Enter at least 1 minute</p>
+                </div>
+                ${this.targetScore !== null ? html`
+                  <!-- Timer Behavior Field -->
+                  <div class="form-group">
+                    <label class="form-label">If time expires with no winner</label>
+                    <div class="flex flex-col gap-2">
+                      <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
+                        <input
+                          type="radio"
+                          name="timerBehavior"
+                          value="highest-score"
+                          .checked=${this.timerBehavior === 'highest-score'}
+                          ?disabled=${!this.canChangeTimeSettings}
+                          @change="${this.handleTimerBehaviorChange}"
+                          class="w-4 h-4" />
+                        <span>Highest Score Wins</span>
+                      </label>
+                      <label class="flex items-center gap-2 ${this.canChangeTimeSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}">
+                        <input
+                          type="radio"
+                          name="timerBehavior"
+                          value="no-winner"
+                          .checked=${this.timerBehavior === 'no-winner'}
+                          ?disabled=${!this.canChangeTimeSettings}
+                          @change="${this.handleTimerBehaviorChange}"
+                          class="w-4 h-4" />
+                        <span>No Winner</span>
+                      </label>
+                    </div>
+                  </div>
+                ` : ''}
+              ` : ''}
+            </div>
+
+            <!-- Section C: Player List -->
+            <div class="md:col-span-1 lg:col-span-1">
+              <x-game-detail-player-list
+                .players="${this.players}"
+                ?disable-editing="${!this.canChangePlayers}"
+                @players-changed="${this.handlePlayersChanged}"></x-game-detail-player-list>
+            </div>
+          </div>
         </div>
 
         <!-- Submit Button -->
-        <div class="p-md mt-auto border-t">
-          <button ?disabled="${!this.formIsValid}" type="submit" class="w-full btn btn-primary">
+        <div class="p-md mt-auto border-t md:flex md:justify-end">
+          <button ?disabled="${!this.formIsValid}" type="submit" class="w-full md:w-auto btn btn-primary">
             ${this.isEditMode ? "Update Game" : "Create Game"}
           </button>
         </div>
