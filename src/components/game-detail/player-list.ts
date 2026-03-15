@@ -57,7 +57,7 @@ export class GameDetailPlayerListComponent extends BaseComponent {
                 <span class="w-6 text-sm text-gray-500">${index + 1}.</span>
                 <input
                   type="text"
-                  value="${player}"
+                  .value="${player}"
                   @input="${(e: Event) =>
                     this.updatePlayerName(index, (e.target as HTMLInputElement).value)}"
                   class="flex-1 form-input"

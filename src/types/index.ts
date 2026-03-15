@@ -1,5 +1,16 @@
 export type ScoreEntry = [number, number];
 
+export interface GameTemplate {
+  id: string;
+  templateName: string;
+  players: string[];
+  targetScore: number | null;
+  timeLimit: number | null;
+  timerBehavior: 'no-winner' | 'highest-score' | null;
+  turnTrackingEnabled: boolean;
+  createdAt: Date;
+}
+
 export interface GamePlayer {
   index: number;
   name: string;

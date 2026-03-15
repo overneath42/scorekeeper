@@ -20,6 +20,7 @@ import "./components/game/elements/current-score.js";
 import "./components/game-detail/form.js";
 import "./components/game-detail/header.js";
 import "./components/game-detail/player-list.js";
+import "./components/game-detail/save-template-modal.js";
 
 import "./components/games-list.js";
 import "./components/game-list/game.js";
