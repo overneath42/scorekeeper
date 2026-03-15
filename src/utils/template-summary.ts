@@ -13,11 +13,16 @@ export function formatTemplateSummary(template: GameTemplate): string {
     const timeParts: string[] = [];
     if (hours > 0) timeParts.push(`${hours}h`);
     if (minutes > 0) timeParts.push(`${minutes}m`);
-    const behavior = template.timerBehavior === "highest-score"
-      ? "highest score wins"
-      : "no winner";
-    parts.push(`Timed Game: ${timeParts.join(" ")}, ${behavior}`);
+    let timedStr = `Timed: ${timeParts.join(" ")}`;
+    if (template.timerBehavior !== null) {
+      timedStr += template.timerBehavior === "highest-score"
+        ? ", highest score wins"
+        : ", no winner";
+    }
+    parts.push(timedStr);
   }
+
+  parts.push(template.turnTrackingEnabled ? "Turn-based" : "Open Scoring");
 
   if (template.players.length > 0) {
     const maxDisplay = 3;
