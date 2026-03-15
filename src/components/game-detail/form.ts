@@ -375,9 +375,23 @@ export class GameDetailFormComponent extends BaseComponent {
       <div class="h-full overflow-hidden flex flex-col" @save-template="${this.handleSaveTemplate}">
         <form @submit="${this.handleSubmit}" class="flex-1 overflow-hidden flex flex-col gap-md">
           <div class="px-md flex-1 overflow-y-auto">
+            <!-- Game Name Field -->
+            <div class="form-group pt-md">
+              <label for="game-name" class="form-label"> Game Name </label>
+              <input
+                type="text"
+                id="game-name"
+                name="name"
+                .value="${this.gameName}"
+                @input="${this.handleGameNameInput}"
+                required
+                class="form-input"
+                placeholder="Enter game name" />
+            </div>
+
             <!-- Template Selector (create mode only, when templates exist) -->
             ${this.context === "create" && this.templates.length > 0 ? html`
-              <div class="form-group pt-md">
+              <div class="form-group">
                 <label class="form-label">Start from Template</label>
                 <div class="flex gap-2 items-center">
                   <x-template-select
@@ -397,24 +411,17 @@ export class GameDetailFormComponent extends BaseComponent {
                   ` : ''}
                 </div>
               </div>
+
+              <div class="flex items-center gap-4 my-md">
+                <div class="flex-1 border-t border-gray-300"></div>
+                <span class="text-sm font-medium text-gray-500">OR</span>
+                <div class="flex-1 border-t border-gray-300"></div>
+              </div>
             ` : ''}
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
               <!-- Section A: Basic Fields -->
               <div class="md:col-span-1 lg:col-span-1 space-y-0">
-                <!-- Game Name Field -->
-                <div class="form-group">
-                  <label for="game-name" class="form-label"> Game Name </label>
-                  <input
-                    type="text"
-                    id="game-name"
-                    name="name"
-                    .value="${this.gameName}"
-                    @input="${this.handleGameNameInput}"
-                    required
-                    class="form-input"
-                    placeholder="Enter game name" />
-                </div>
                 <!-- Target Score Field -->
                 <div class="form-group">
                   <label for="target-score" class="form-label"> Target Score </label>
