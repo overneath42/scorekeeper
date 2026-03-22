@@ -36,9 +36,14 @@ export class SaveTemplateModalComponent extends BaseComponent {
 
   private handleInput(e: Event): void {
     this.templateName = (e.target as HTMLInputElement).value;
-    this.isDuplicate = this.templateName.trim().length > 0 &&
-      this.templateStorage.hasTemplateName(this.templateName.trim());
     this.saveError = false;
+    if (this.templateName.trim().length > 0) {
+      void this.templateStorage.hasTemplateName(this.templateName.trim()).then(isDuplicate => {
+        this.isDuplicate = isDuplicate;
+      });
+    } else {
+      this.isDuplicate = false;
+    }
   }
 
   private handleSave(): void {

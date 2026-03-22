@@ -69,7 +69,7 @@ export class GamesListComponent extends BaseComponent {
       return html`<div class="text-center text-gray-500">Loading games...</div>`;
     }
 
-    const games = this.gameList.getAllGames();
+    const games = this.gameList.games;
 
     if (games.length === 0) {
       return html`

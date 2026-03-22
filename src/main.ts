@@ -32,3 +32,14 @@ const application = Application.start();
 window.Stimulus = application;
 
 initBarba();
+
+if (import.meta.env.VITE_FIREBASE_API_KEY) {
+  import("./services/firebase.js").then(({ tryResumeSession, activateSync }) => {
+    tryResumeSession().then(async (userId) => {
+      if (!userId) return;
+      await activateSync(userId);
+    }).catch(err => {
+      console.error("Firebase initialization failed, using local-only storage:", err);
+    });
+  });
+}

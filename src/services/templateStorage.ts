@@ -24,7 +24,7 @@ export class TemplateStorageService {
     return TemplateStorageService.instance;
   }
 
-  createTemplate(options: CreateTemplateOptions): GameTemplate | null {
+  async createTemplate(options: CreateTemplateOptions): Promise<GameTemplate | null> {
     const template: GameTemplate = {
       id: crypto.randomUUID(),
       templateName: options.templateName,
@@ -36,12 +36,12 @@ export class TemplateStorageService {
       createdAt: new Date(),
     };
 
-    const success = this.storage.set(template.id, template);
+    const success = await this.storage.set(template.id, template);
     return success ? template : null;
   }
 
-  getTemplate(id: string): GameTemplate | null {
-    const template = this.storage.get(id);
+  async getTemplate(id: string): Promise<GameTemplate | null> {
+    const template = await this.storage.get(id);
     if (!template) return null;
     return {
       ...template,
@@ -49,20 +49,22 @@ export class TemplateStorageService {
     };
   }
 
-  getAllTemplates(): GameTemplate[] {
-    return this.storage.keys()
-      .map((id) => this.getTemplate(id))
+  async getAllTemplates(): Promise<GameTemplate[]> {
+    const ids = await this.storage.keys();
+    const templates = await Promise.all(ids.map(id => this.getTemplate(id)));
+    return templates
       .filter((t): t is GameTemplate => t !== null)
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
 
-  deleteTemplate(id: string): boolean {
+  async deleteTemplate(id: string): Promise<boolean> {
     return this.storage.remove(id);
   }
 
-  hasTemplateName(name: string): boolean {
+  async hasTemplateName(name: string): Promise<boolean> {
     const normalized = name.trim().toLowerCase();
-    return this.getAllTemplates().some(
+    const templates = await this.getAllTemplates();
+    return templates.some(
       (t) => t.templateName.toLowerCase() === normalized
     );
   }

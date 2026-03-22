@@ -65,7 +65,7 @@ export class GameDetailFormComponent extends BaseComponent {
   @state()
   templateToDelete: GameTemplate | null = null;
 
-  storage = GameStorageService.getInstance();
+  get storage() { return GameStorageService.getInstance(); }
   templateStorage = TemplateStorageService.getInstance();
 
   private saveTemplateModalRef: Ref<SaveTemplateModalComponent> = createRef();
@@ -102,17 +102,19 @@ export class GameDetailFormComponent extends BaseComponent {
 
   connectedCallback() {
     super.connectedCallback();
-    this.templates = this.templateStorage.getAllTemplates();
+    void this.templateStorage.getAllTemplates().then(templates => {
+      this.templates = templates;
+    });
     if (this.context === "edit") {
-      this.populateForm();
+      void this.populateForm();
     }
   }
 
-  private populateForm() {
+  private async populateForm() {
     const id = new URLSearchParams(window.location.search).get("id");
 
     if (id) {
-      const storedGame = this.storage.getStoredGame(id);
+      const storedGame = await this.storage.getStoredGame(id);
 
       if (storedGame) {
         this.game = storedGame;
@@ -154,21 +156,21 @@ export class GameDetailFormComponent extends BaseComponent {
 
     switch (this.context) {
       case "create":
-        this.handleCreateSubmit();
+        void this.handleCreateSubmit();
         break;
       case "edit":
-        this.handleEditSubmit();
+        void this.handleEditSubmit();
         break;
       default:
         console.warn(`Unknown form context: ${this.context}`);
     }
   }
 
-  private handleCreateSubmit() {
+  private async handleCreateSubmit() {
     const timeLimit = this.isTimedGame ? this.hours * 3600 + this.minutes * 60 : null;
     const timerBehavior = this.isTimedGame && this.targetScore !== null ? this.timerBehavior : null;
 
-    const game = this.storage.createGame(
+    const game = await this.storage.createGame(
       this.gameName,
       this.players,
       this.targetScore,
@@ -176,15 +178,15 @@ export class GameDetailFormComponent extends BaseComponent {
       timerBehavior,
       this.turnTrackingEnabled
     );
-    this.gameList?.addGame(game);
+    await this.gameList?.addGame(game);
     this.redirectToGameboard(game.id);
   }
 
-  private handleEditSubmit() {
+  private async handleEditSubmit() {
     const id = new URLSearchParams(window.location.search).get("id");
 
     if (id) {
-      const existingGame = this.storage.getStoredGame(id);
+      const existingGame = await this.storage.getStoredGame(id);
 
       if (existingGame) {
         const timeLimit = this.isTimedGame ? this.hours * 3600 + this.minutes * 60 : null;
@@ -206,8 +208,8 @@ export class GameDetailFormComponent extends BaseComponent {
           updatedAt: new Date(),
         };
 
-        this.storage.saveGame(updatedGame);
-        this.gameList?.updateGame(updatedGame);
+        await this.storage.saveGame(updatedGame);
+        await this.gameList?.updateGame(updatedGame);
         this.redirectToGameboard(updatedGame.id);
       } else {
         console.warn(`No stored game found with ID: ${id}`);
@@ -223,66 +225,70 @@ export class GameDetailFormComponent extends BaseComponent {
       return;
     }
 
-    const template = this.templateStorage.getTemplate(this.selectedTemplateId);
-    if (!template) return;
+    void this.templateStorage.getTemplate(this.selectedTemplateId).then(template => {
+      if (!template) return;
 
-    this.players = [...template.players];
-    this.targetScore = template.targetScore;
-    this.isTimedGame = template.timeLimit !== null && template.timeLimit > 0;
-    if (this.isTimedGame && template.timeLimit) {
-      const { hours, minutes } = parseTimeLimit(template.timeLimit);
-      this.hours = hours;
-      this.minutes = minutes;
-    } else {
-      this.hours = 0;
-      this.minutes = 0;
-    }
-    this.timerBehavior = template.timerBehavior;
-    this.turnTrackingEnabled = template.turnTrackingEnabled;
+      this.players = [...template.players];
+      this.targetScore = template.targetScore;
+      this.isTimedGame = template.timeLimit !== null && template.timeLimit > 0;
+      if (this.isTimedGame && template.timeLimit) {
+        const { hours, minutes } = parseTimeLimit(template.timeLimit);
+        this.hours = hours;
+        this.minutes = minutes;
+      } else {
+        this.hours = 0;
+        this.minutes = 0;
+      }
+      this.timerBehavior = template.timerBehavior;
+      this.turnTrackingEnabled = template.turnTrackingEnabled;
+    });
   }
 
   private handleDeleteTemplateClick() {
     if (!this.selectedTemplateId) return;
-    const template = this.templateStorage.getTemplate(this.selectedTemplateId);
-    if (!template) return;
+    void this.templateStorage.getTemplate(this.selectedTemplateId).then(template => {
+      if (!template) return;
 
-    this.templateToDelete = template;
-    this.deleteModalRef.value?.open({
-      title: "Delete Template",
-      content: html`
-        <p class="mb-4">
-          Are you sure you want to delete the template "${template.templateName}"? This action
-          cannot be undone.
-        </p>
-        <div class="flex gap-2 justify-end">
-          <button
-            type="button"
-            @click=${() => this.deleteModalRef.value?.close()}
-            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-            Cancel
-          </button>
-          <button
-            type="button"
-            @click=${() => this.confirmDeleteTemplate()}
-            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-            Delete
-          </button>
-        </div>
-      `,
-      size: "sm",
-      onClose: () => {
-        this.templateToDelete = null;
-      },
+      this.templateToDelete = template;
+      this.deleteModalRef.value?.open({
+        title: "Delete Template",
+        content: html`
+          <p class="mb-4">
+            Are you sure you want to delete the template "${template.templateName}"? This action
+            cannot be undone.
+          </p>
+          <div class="flex gap-2 justify-end">
+            <button
+              type="button"
+              @click=${() => this.deleteModalRef.value?.close()}
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+              Cancel
+            </button>
+            <button
+              type="button"
+              @click=${() => this.confirmDeleteTemplate()}
+              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+              Delete
+            </button>
+          </div>
+        `,
+        size: "sm",
+        onClose: () => {
+          this.templateToDelete = null;
+        },
+      });
     });
   }
 
   private confirmDeleteTemplate() {
     if (!this.templateToDelete) return;
-    this.templateStorage.deleteTemplate(this.templateToDelete.id);
+    void this.templateStorage.deleteTemplate(this.templateToDelete.id);
     this.templateToDelete = null;
     this.selectedTemplateId = "";
     this.resetFormToDefaults();
-    this.templates = this.templateStorage.getAllTemplates();
+    void this.templateStorage.getAllTemplates().then(templates => {
+      this.templates = templates;
+    });
     this.deleteModalRef.value?.close();
   }
 
@@ -295,21 +301,23 @@ export class GameDetailFormComponent extends BaseComponent {
     const timeLimit = this.isTimedGame ? this.hours * 3600 + this.minutes * 60 : null;
     const timerBehavior = this.isTimedGame && this.targetScore !== null ? this.timerBehavior : null;
 
-    const template = this.templateStorage.createTemplate({
+    void this.templateStorage.createTemplate({
       templateName,
       players: this.players,
       targetScore: this.targetScore,
       timeLimit,
       timerBehavior,
       turnTrackingEnabled: this.turnTrackingEnabled,
+    }).then(template => {
+      if (template) {
+        void this.templateStorage.getAllTemplates().then(templates => {
+          this.templates = templates;
+        });
+        this.saveTemplateModalRef.value?.close();
+      } else {
+        this.saveTemplateModalRef.value?.showSaveError();
+      }
     });
-
-    if (template) {
-      this.templates = this.templateStorage.getAllTemplates();
-      this.saveTemplateModalRef.value?.close();
-    } else {
-      this.saveTemplateModalRef.value?.showSaveError();
-    }
   }
 
   private handlePlayersChanged(e: CustomEvent) {

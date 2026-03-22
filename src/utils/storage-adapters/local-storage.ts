@@ -29,73 +29,89 @@ export class LocalStorageAdapter<T> implements StorageAdapter<T> {
     return this.prefix ? `${this.prefix}:${key}` : key;
   }
 
-  get(key: string): T | null {
+  async get(key: string): Promise<T | null> {
     try {
       const item = localStorage.getItem(this.getKey(key));
-      return item ? JSON.parse(item) : null;
+      return Promise.resolve(item ? JSON.parse(item) : null);
     } catch (error) {
       console.error(`Error reading from localStorage for key "${key}":`, error);
-      return null;
+      return Promise.resolve(null);
     }
   }
 
-  set(key: string, value: T): boolean {
+  async set(key: string, value: T): Promise<boolean> {
     try {
       localStorage.setItem(this.getKey(key), JSON.stringify(value));
-      return true;
+      return Promise.resolve(true);
     } catch (error) {
       console.error(`Error writing to localStorage for key "${key}":`, error);
-      return false;
-    }
-  }
- 
-  remove(key: string): boolean {
-    try {
-      localStorage.removeItem(this.getKey(key));
-      return true;
-    } catch (error) {
-      console.error(`Error removing from localStorage for key "${key}":`, error);
-      return false;
+      return Promise.resolve(false);
     }
   }
 
-  clear(): boolean {
+  async remove(key: string): Promise<boolean> {
+    try {
+      localStorage.removeItem(this.getKey(key));
+      return Promise.resolve(true);
+    } catch (error) {
+      console.error(`Error removing from localStorage for key "${key}":`, error);
+      return Promise.resolve(false);
+    }
+  }
+
+  async clear(): Promise<boolean> {
     try {
       if (this.prefix) {
-        const keys = this.keys();
+        const keys = await this.keys();
         keys.forEach((key) => localStorage.removeItem(this.getKey(key)));
       } else {
         localStorage.clear();
       }
-      return true;
+      return Promise.resolve(true);
     } catch (error) {
       console.error("Error clearing localStorage:", error);
-      return false;
+      return Promise.resolve(false);
     }
   }
 
-  keys(): string[] {
+  async keys(): Promise<string[]> {
     try {
       const allKeys = Object.keys(localStorage);
       if (this.prefix) {
         const prefixPattern = `${this.prefix}:`;
-        return allKeys
-          .filter((key) => key.startsWith(prefixPattern))
-          .map((key) => key.substring(prefixPattern.length));
+        return Promise.resolve(
+          allKeys
+            .filter((key) => key.startsWith(prefixPattern))
+            .map((key) => key.substring(prefixPattern.length))
+        );
       }
-      return allKeys;
+      return Promise.resolve(allKeys);
     } catch (error) {
       console.error("Error getting localStorage keys:", error);
-      return [];
+      return Promise.resolve([]);
     }
   }
 
-  has(key: string): boolean {
+  async has(key: string): Promise<boolean> {
     try {
-      return localStorage.getItem(this.getKey(key)) !== null;
+      return Promise.resolve(localStorage.getItem(this.getKey(key)) !== null);
     } catch (error) {
       console.error(`Error checking localStorage for key "${key}":`, error);
-      return false;
+      return Promise.resolve(false);
+    }
+  }
+
+  async getAll(): Promise<T[]> {
+    try {
+      const keys = await this.keys();
+      const items = keys.map((key) => {
+        const item = localStorage.getItem(this.getKey(key));
+        return item ? (JSON.parse(item) as T) : null;
+      });
+      return Promise.resolve(items.filter((item): item is T => item !== null));
+    } catch (error) {
+      console.error("Error getting all items from localStorage:", error);
+      return Promise.resolve([]);
     }
   }
 }

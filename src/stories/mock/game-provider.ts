@@ -43,9 +43,9 @@ export class MockGameProvider extends LitElement {
         [2, 18], // Carol: 18
         [1, 13], // Bob: 13
       ],
-      createNewGame: () => {},
-      addScore: () => {},
-      updateGame: () => {},
+      createNewGame: async () => {},
+      addScore: async () => {},
+      updateGame: async () => {},
       getPlayerScoringHistory: (playerIndex: number): number[] => {
         return mockGame.scoringHistory
           .filter(([pIndex]) => pIndex === playerIndex)
@@ -63,7 +63,7 @@ export class MockGameProvider extends LitElement {
           .map((i) => mockGame.getPlayerCurrentScore(i));
         return currentScore > Math.max(...otherScores);
       },
-      loadGameById: () => {},
+      loadGameById: async () => {},
       // Turn tracking methods (not enabled in mock by default)
       canPlayerScore: () => true,
       getCurrentPlayerIndex: () => null,
