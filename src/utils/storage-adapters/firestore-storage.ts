@@ -10,17 +10,19 @@ import {
   writeBatch,
   CollectionReference,
   DocumentData,
+  Firestore,
   Timestamp,
 } from "firebase/firestore";
-import { db } from "@/services/firebase.js";
 import type { StorageAdapter } from "./types.js";
 import type { ScoreEntry } from "@/types/index.js";
 
 export class FirestoreStorageAdapter<T extends object> implements StorageAdapter<T> {
   private collectionRef: CollectionReference;
+  private db: Firestore;
   private userId: string;
 
-  constructor(collectionName: string, userId: string) {
+  constructor(db: Firestore, collectionName: string, userId: string) {
+    this.db = db;
     this.collectionRef = collection(db, collectionName);
     this.userId = userId;
   }
@@ -59,7 +61,7 @@ export class FirestoreStorageAdapter<T extends object> implements StorageAdapter
     const q = query(this.collectionRef, where("userId", "==", this.userId));
     const snapshot = await getDocs(q);
     for (let i = 0; i < snapshot.docs.length; i += 500) {
-      const batch = writeBatch(db);
+      const batch = writeBatch(this.db);
       snapshot.docs.slice(i, i + 500).forEach(d => batch.delete(d.ref));
       await batch.commit();
     }
