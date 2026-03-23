@@ -76,14 +76,14 @@ export async function signOut(): Promise<void> {
 export async function activateSync(userId: string): Promise<void> {
   // Games
   const localGames = new LocalStorageAdapter<StoredGame>("scorekeeper");
-  const firestoreGames = new FirestoreStorageAdapter<StoredGame>("games", userId);
+  const firestoreGames = new FirestoreStorageAdapter<StoredGame>(db, "games", userId);
   const throttledGames = new ThrottledStorageAdapter(firestoreGames, 30_000);
   activeThrottledAdapter = throttledGames;
   GameStorageService.initialize(new SyncedStorageAdapter(localGames, throttledGames));
 
   // Templates
   const localTemplates = new LocalStorageAdapter<GameTemplate>("scorekeeper-templates");
-  const firestoreTemplates = new FirestoreStorageAdapter<GameTemplate>("templates", userId);
+  const firestoreTemplates = new FirestoreStorageAdapter<GameTemplate>(db, "templates", userId);
   const throttledTemplates = new ThrottledStorageAdapter(firestoreTemplates, 30_000);
   activeTemplateThrottledAdapter = throttledTemplates;
   TemplateStorageService.initialize(new SyncedStorageAdapter(localTemplates, throttledTemplates));

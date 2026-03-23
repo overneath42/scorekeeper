@@ -1,4 +1,4 @@
-import { html, nothing, TemplateResult } from "lit";
+import { html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { createRef, ref, Ref } from "lit/directives/ref.js";
 import { BaseComponent } from "@/utils";
