@@ -13,8 +13,12 @@ export class TemplateStorageService {
   private storage: StorageAdapter<GameTemplate>;
   private static instance: TemplateStorageService;
 
-  private constructor() {
-    this.storage = new LocalStorageAdapter<GameTemplate>("scorekeeper-templates");
+  private constructor(storage?: StorageAdapter<GameTemplate>) {
+    this.storage = storage ?? new LocalStorageAdapter<GameTemplate>("scorekeeper-templates");
+  }
+
+  static initialize(storage: StorageAdapter<GameTemplate>): void {
+    TemplateStorageService.instance = new TemplateStorageService(storage);
   }
 
   static getInstance(): TemplateStorageService {
@@ -59,6 +63,10 @@ export class TemplateStorageService {
 
   async deleteTemplate(id: string): Promise<boolean> {
     return this.storage.remove(id);
+  }
+
+  async clearAllTemplates(): Promise<boolean> {
+    return this.storage.clear();
   }
 
   async hasTemplateName(name: string): Promise<boolean> {

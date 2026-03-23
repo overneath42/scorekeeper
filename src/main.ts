@@ -26,6 +26,8 @@ import "./components/game-detail/template-select.js";
 import "./components/games-list.js";
 import "./components/game-list/game.js";
 
+import "./components/auth/auth-controls.js";
+
 import { initBarba } from "./barba-init.js";
 
 const application = Application.start();

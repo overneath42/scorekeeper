@@ -78,6 +78,9 @@ export class FirestoreStorageAdapter<T extends object> implements StorageAdapter
       if (v === undefined) continue;
       if (v instanceof Date) {
         out[k] = Timestamp.fromDate(v);
+      } else if (k === "scoringHistory" && Array.isArray(v)) {
+        // Firestore doesn't support nested arrays — convert [playerIndex, score] tuples to objects
+        out[k] = (v as number[][]).map(([p, s]) => ({ p, s }));
       } else {
         out[k] = v;
       }
@@ -90,12 +93,12 @@ export class FirestoreStorageAdapter<T extends object> implements StorageAdapter
     for (const [k, v] of Object.entries(data)) {
       if (v instanceof Timestamp) {
         out[k] = v.toDate();
+      } else if (k === "scoringHistory" && Array.isArray(v)) {
+        // Convert back from objects to [playerIndex, score] tuples
+        out[k] = (v as { p: number; s: number }[]).map(({ p, s }) => [p, s]) as unknown as ScoreEntry[];
       } else {
         out[k] = v;
       }
-    }
-    if (out.scoringHistory) {
-      out.scoringHistory = (out.scoringHistory as number[][]) as unknown as ScoreEntry[];
     }
     return out as T;
   }

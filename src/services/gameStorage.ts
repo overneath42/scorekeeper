@@ -28,9 +28,6 @@ export class GameStorageService {
   }
 
   static initialize(storage: StorageAdapter<StoredGame>): void {
-    if (GameStorageService.instance) {
-      console.warn("GameStorageService.initialize() called after getInstance()");
-    }
     GameStorageService.instance = new GameStorageService(storage);
   }
 

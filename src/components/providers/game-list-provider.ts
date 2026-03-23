@@ -15,41 +15,37 @@ export class GameListProviderComponent extends BaseComponent {
     return this.storage.getAllStoredGames();
   };
 
+  private async refreshGames() {
+    this.gameList = { ...this.gameList, games: await this.storage.getAllStoredGames() };
+  }
+
   private addGame = async (game: StoredGame) => {
     await this.storage.saveGame(game);
-    this.gameList.games = await this.storage.getAllStoredGames();
-    this.requestUpdate();
+    await this.refreshGames();
   };
 
   private removeGame = async (id: string) => {
     await this.storage.deleteGame(id);
-    this.gameList.games = await this.storage.getAllStoredGames();
-    this.requestUpdate();
+    await this.refreshGames();
   };
 
   private updateGame = async (updatedGame: StoredGame) => {
     await this.storage.saveGame(updatedGame);
-    this.gameList.games = await this.storage.getAllStoredGames();
-    this.requestUpdate();
+    await this.refreshGames();
   };
 
   private clearGames = async () => {
     await this.storage.clearAllGames();
-    this.gameList.games = await this.storage.getAllStoredGames();
-    this.requestUpdate();
+    await this.refreshGames();
   };
 
   private handleSyncComplete = async () => {
-    this.gameList.games = await this.storage.getAllStoredGames();
-    this.requestUpdate();
+    await this.refreshGames();
   };
 
   connectedCallback() {
     super.connectedCallback();
-    void (async () => {
-      this.gameList.games = await this.storage.getAllStoredGames();
-      this.requestUpdate();
-    })();
+    void this.refreshGames();
     window.addEventListener("scorekeeper:sync-complete", this.handleSyncComplete);
   }
 
