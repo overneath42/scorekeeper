@@ -9,7 +9,9 @@ const now = new Date();
 
 @customElement("x-game-provider")
 export class GameProviderComponent extends BaseComponent {
-  private storage = GameStorageService.getInstance();
+  private get storage() {
+    return GameStorageService.getInstance();
+  }
   private currentGameId: string | null = null;
   private timerInterval: number | null = null;
   private lastSaveTime: number = 0;
@@ -17,7 +19,6 @@ export class GameProviderComponent extends BaseComponent {
 
   connectedCallback() {
     super.connectedCallback();
-    // Set up Page Visibility API listener
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
   }
 
@@ -32,19 +33,16 @@ export class GameProviderComponent extends BaseComponent {
   };
 
   private startTimer() {
-    // Only start timer if game has a time limit, is active, and has remaining time
     if (!this.game.timeLimit || this.game.status !== "active" || !this.game.timeRemaining || this.game.timeRemaining <= 0) {
       return;
     }
 
-    // Don't start if already running
     if (this.timerInterval !== null) {
       return;
     }
 
-    // Update lastActiveAt when starting timer
     if (this.currentGameId) {
-      this.storage.updateLastActiveAt(this.currentGameId, new Date());
+      void this.storage.updateLastActiveAt(this.currentGameId, new Date());
     }
 
     this.timerInterval = window.setInterval(() => this.tickTimer(), 1000);
@@ -52,9 +50,8 @@ export class GameProviderComponent extends BaseComponent {
 
   private stopTimer(withFinalSave: boolean = false) {
     if (this.timerInterval !== null) {
-      // Save current state before stopping if requested
       if (withFinalSave && this.currentGameId && this.game.timeRemaining !== null) {
-        this.storage.updateTimeRemaining(this.currentGameId, this.game.timeRemaining);
+        void this.storage.updateTimeRemaining(this.currentGameId, this.game.timeRemaining);
       }
 
       window.clearInterval(this.timerInterval);
@@ -63,76 +60,63 @@ export class GameProviderComponent extends BaseComponent {
   }
 
   private tickTimer() {
-    // Only tick if page is visible, game is active, and has time remaining
     if (!this.isPageVisible || this.game.status !== "active" || !this.game.timeRemaining || this.game.timeRemaining <= 0) {
       return;
     }
 
-    // Decrement time remaining and trigger reactivity by reassigning the game object
     this.game = {
       ...this.game,
       timeRemaining: this.game.timeRemaining - 1
     };
 
-    // Save to storage every 5 seconds
     const now = Date.now();
     if (now - this.lastSaveTime >= 5000) {
       if (this.currentGameId && this.game.timeRemaining !== null) {
-        this.storage.updateTimeRemaining(this.currentGameId, this.game.timeRemaining);
-        this.storage.updateLastActiveAt(this.currentGameId, new Date());
+        void this.storage.updateTimeRemaining(this.currentGameId, this.game.timeRemaining);
+        void this.storage.updateLastActiveAt(this.currentGameId, new Date());
       }
       this.lastSaveTime = now;
     }
 
-    // Check for time expiry
     if (this.game.timeRemaining !== null && this.game.timeRemaining <= 0) {
-      this.handleTimeExpiry();
+      void this.handleTimeExpiry();
     }
   }
 
-  private handleTimeExpiry() {
+  private async handleTimeExpiry() {
     this.stopTimer();
 
     if (!this.currentGameId) return;
 
-    // Save final time remaining (0)
-    this.storage.updateTimeRemaining(this.currentGameId, 0);
+    await this.storage.updateTimeRemaining(this.currentGameId, 0);
 
-    // Determine winner based on rules
     const playerScores = this.storage.calculatePlayerScores(this.game);
     const maxScore = Math.max(...playerScores);
     let hasWinner = false;
 
     if (this.game.targetScore) {
-      // Check if anyone met the target score
       const someoneMetTarget = playerScores.some(score => score >= this.game.targetScore!);
 
       if (someoneMetTarget) {
         hasWinner = true;
       } else {
-        // No one met target - apply timer behavior
         if (this.game.timerBehavior === 'highest-score') {
           hasWinner = maxScore > 0;
         } else {
-          // 'no-winner' behavior
           hasWinner = false;
         }
       }
     } else {
-      // No target score - highest score wins
       hasWinner = maxScore > 0;
     }
 
-    // Mark game as completed
-    this.storage.updateGameStatus(this.currentGameId, "completed");
+    await this.storage.updateGameStatus(this.currentGameId, "completed");
 
-    // Reload game to reflect completion status
-    const finalGame = this.storage.getStoredGame(this.currentGameId);
+    const finalGame = await this.storage.getStoredGame(this.currentGameId);
     if (finalGame) {
       this.loadGame(finalGame);
     }
 
-    // Dispatch custom event for time expiry modal
     this.dispatchEvent(new CustomEvent('time-expired', {
       bubbles: true,
       composed: true,
@@ -140,29 +124,28 @@ export class GameProviderComponent extends BaseComponent {
     }));
   }
 
-  private createNewGame = (name: string, targetScore: number, players: string[]) => {
-    const storedGame = this.storage.createGame(name, players, targetScore);
+  private createNewGame = async (name: string, targetScore: number, players: string[]) => {
+    const storedGame = await this.storage.createGame(name, players, targetScore);
     this.currentGameId = storedGame.id;
     this.loadGame(storedGame);
   };
 
-  private updateGame = (game: Game) => {
+  private updateGame = async (game: Game) => {
     if (this.currentGameId) {
-      this.storage.updateGame(this.currentGameId, game);
-      const updatedGame = this.storage.getStoredGame(this.currentGameId);
+      await this.storage.updateGame(this.currentGameId, game);
+      const updatedGame = await this.storage.getStoredGame(this.currentGameId);
       if (updatedGame) {
         this.loadGame(updatedGame);
       }
     }
   };
 
-  private addScore = (playerIndex: number, score: number) => {
+  private addScore = async (playerIndex: number, score: number) => {
     if (this.currentGameId) {
-      this.storage.addScore(this.currentGameId, playerIndex, score);
-      const updatedGame = this.storage.getStoredGame(this.currentGameId);
+      await this.storage.addScore(this.currentGameId, playerIndex, score);
+      const updatedGame = await this.storage.getStoredGame(this.currentGameId);
 
       if (updatedGame) {
-        // Check if game should be completed based on target score
         if (updatedGame.targetScore && updatedGame.status === "active") {
           const playerScores = this.storage.calculatePlayerScores(updatedGame);
           const hasWinner = playerScores.some(
@@ -170,8 +153,8 @@ export class GameProviderComponent extends BaseComponent {
           );
 
           if (hasWinner) {
-            this.storage.updateGameStatus(this.currentGameId, "completed");
-            const finalGame = this.storage.getStoredGame(this.currentGameId);
+            await this.storage.updateGameStatus(this.currentGameId, "completed");
+            const finalGame = await this.storage.getStoredGame(this.currentGameId);
             if (finalGame) {
               this.loadGame(finalGame);
               return;
@@ -185,33 +168,20 @@ export class GameProviderComponent extends BaseComponent {
   };
 
   private getPlayerCurrentScore = (playerIndex: number): number => {
-    if (this.currentGameId) {
-      const storedGame = this.storage.getStoredGame(this.currentGameId);
-      if (storedGame) {
-        const scores = this.storage.calculatePlayerScores(storedGame);
-        return scores[playerIndex] || 0;
-      }
-    }
-    return 0;
+    const scores = this.storage.calculatePlayerScores(this.game);
+    return scores[playerIndex] || 0;
   };
 
   private getPlayerScoringHistory = (playerIndex: number): number[] => {
-    if (this.currentGameId) {
-      const storedGame = this.storage.getStoredGame(this.currentGameId);
-      if (storedGame) {
-        return this.storage.getPlayerScoringHistory(storedGame, playerIndex);
-      }
-    }
-    return [];
+    return this.storage.getPlayerScoringHistory(this.game, playerIndex);
   };
 
   private getCurrentWinners = (): GamePlayer[] => {
     if (!this.game) return [];
-
-    const scores = this.game.players.map((player) => this.getPlayerCurrentScore(player.index));
+    const scores = this.storage.calculatePlayerScores(this.game);
     const maxScore = Math.max(...scores);
     return this.game.players.filter(
-      (player) => this.getPlayerCurrentScore(player.index) === maxScore && maxScore > 0
+      (player) => scores[player.index] === maxScore && maxScore > 0
     );
   };
 
@@ -224,7 +194,6 @@ export class GameProviderComponent extends BaseComponent {
     return currentWinners.length > 1;
   }
 
-  // Turn tracking methods
   private hasTurnTracking = (): boolean => {
     return this.game.turnTrackingEnabled === true;
   };
@@ -240,28 +209,12 @@ export class GameProviderComponent extends BaseComponent {
   };
 
   private canPlayerScore = (playerIndex: number): boolean => {
-    // Completed games: no scoring
     if (this.game.status === "completed") return false;
-
-    // No turn tracking: anyone can score
     if (!this.hasTurnTracking()) return true;
-
-    // Turn tracking: only current player can score
     return this.getCurrentPlayerIndex() === playerIndex;
   };
 
-  /**
-   * Loads a stored game into the current game state, attaching relevant game methods to the loaded object.
-   *
-   * @param storedGame - The game data to load, typically retrieved from storage.
-   *
-   * This method sets the `game` property to the loaded game data and binds core game manipulation methods
-   * (such as creating a new game, updating the game, adding scores, retrieving player scoring history and current score,
-   * checking for the current winner, and loading a game by ID) to the loaded game object. After updating the game state,
-   * it triggers a UI update by calling `requestUpdate()`.
-   */
   private loadGame = (storedGame: StoredGame) => {
-    // Stop existing timer before loading new game
     this.stopTimer();
 
     this.game = {
@@ -274,14 +227,12 @@ export class GameProviderComponent extends BaseComponent {
       isCurrentWinner: this.isCurrentWinner,
       loadGameById: this.loadGameById,
       isTied: this.gameIsTied,
-      // Turn tracking methods
       canPlayerScore: this.canPlayerScore,
       getCurrentPlayerIndex: this.getCurrentPlayerIndex,
       getCurrentTurnNumber: this.getCurrentTurnNumber,
       hasTurnTracking: this.hasTurnTracking,
     };
 
-    // Start timer if this is a timed, active game
     if (storedGame.timeLimit && storedGame.status === "active" && storedGame.timeRemaining && storedGame.timeRemaining > 0) {
       this.startTimer();
     }
@@ -289,16 +240,8 @@ export class GameProviderComponent extends BaseComponent {
     this.requestUpdate();
   };
 
-  /**
-   * Loads a game by its unique identifier.
-   *
-   * Retrieves the stored game data associated with the provided `gameId` from storage.
-   * If the game exists, sets the current game ID and loads the game into the application state.
-   *
-   * @param gameId - The unique identifier of the game to load.
-   */
-  loadGameById = (gameId: string) => {
-    const storedGame = this.storage.getStoredGame(gameId);
+  loadGameById = async (gameId: string) => {
+    const storedGame = await this.storage.getStoredGame(gameId);
     if (storedGame) {
       this.currentGameId = gameId;
       this.loadGame(storedGame);
@@ -321,8 +264,6 @@ export class GameProviderComponent extends BaseComponent {
     createdAt: now,
     updatedAt: now,
     status: "active",
-    // For easy testing/development, uncomment to start with sample data
-    // ...SAMPLE_GAME,
     createNewGame: this.createNewGame,
     updateGame: this.updateGame,
     addScore: this.addScore,
@@ -331,7 +272,6 @@ export class GameProviderComponent extends BaseComponent {
     isCurrentWinner: this.isCurrentWinner,
     loadGameById: this.loadGameById,
     isTied: this.gameIsTied,
-    // Turn tracking methods
     canPlayerScore: this.canPlayerScore,
     getCurrentPlayerIndex: this.getCurrentPlayerIndex,
     getCurrentTurnNumber: this.getCurrentTurnNumber,

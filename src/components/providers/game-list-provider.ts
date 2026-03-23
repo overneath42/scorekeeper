@@ -7,39 +7,51 @@ import { GameStorageService, type StoredGame } from "@/services";
 
 @customElement("x-game-list-provider")
 export class GameListProviderComponent extends BaseComponent {
-  private storage = GameStorageService.getInstance();
+  private get storage() {
+    return GameStorageService.getInstance();
+  }
 
-  private getAllGames = () => {
+  private getAllGames = async () => {
     return this.storage.getAllStoredGames();
   };
 
-  private addGame = (game: StoredGame) => {
-    this.storage.saveGame(game);
-    this.gameList.games = this.storage.getAllStoredGames();
-    this.requestUpdate();
+  private async refreshGames() {
+    this.gameList = { ...this.gameList, games: await this.storage.getAllStoredGames() };
+  }
+
+  private addGame = async (game: StoredGame) => {
+    await this.storage.saveGame(game);
+    await this.refreshGames();
   };
 
-  private removeGame = (id: string) => {
-    this.storage.deleteGame(id);
-    this.gameList.games = this.storage.getAllStoredGames();
-    this.requestUpdate();
+  private removeGame = async (id: string) => {
+    await this.storage.deleteGame(id);
+    await this.refreshGames();
   };
 
-  private updateGame = (updatedGame: StoredGame) => {
-    this.storage.saveGame(updatedGame);
-    this.gameList.games = this.storage.getAllStoredGames();
-    this.requestUpdate();
+  private updateGame = async (updatedGame: StoredGame) => {
+    await this.storage.saveGame(updatedGame);
+    await this.refreshGames();
   };
 
-  private clearGames = () => {
-    this.storage.clearAllGames();
-    this.gameList.games = this.storage.getAllStoredGames();
-    this.requestUpdate();
+  private clearGames = async () => {
+    await this.storage.clearAllGames();
+    await this.refreshGames();
+  };
+
+  private handleSyncComplete = async () => {
+    await this.refreshGames();
   };
 
   connectedCallback() {
     super.connectedCallback();
-    this.gameList.games = this.storage.getAllStoredGames();
+    void this.refreshGames();
+    window.addEventListener("scorekeeper:sync-complete", this.handleSyncComplete);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener("scorekeeper:sync-complete", this.handleSyncComplete);
   }
 
   @provide({ context: gameListContext })

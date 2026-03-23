@@ -13,7 +13,7 @@ export interface StorageAdapter<T> {
    * @param key - The key whose value should be retrieved.
    * @returns The value associated with the key, or `null` if the key does not exist.
    */
-  get(key: string): T | null;
+  get(key: string): Promise<T | null>;
   /**
    * Stores a value under the specified key.
    * @param key - The key under which to store the value.
@@ -21,28 +21,33 @@ export interface StorageAdapter<T> {
    * @returns `true` if the value was successfully stored, otherwise `false`.
    */
 
-  set(key: string, value: T): boolean;
+  set(key: string, value: T): Promise<boolean>;
   /**
    * Removes the value associated with the specified key.
    * @param key - The key whose value should be removed.
    * @returns `true` if the key existed and was removed, otherwise `false`.
    */
-  remove(key: string): boolean;
+  remove(key: string): Promise<boolean>;
   /**
    * Removes all key-value pairs from the storage.
    * @returns `true` if the storage was successfully cleared, otherwise `false`.
    */
-  clear(): boolean;
+  clear(): Promise<boolean>;
   /**
    * Returns an array of all keys currently stored.
    * @returns An array of strings representing the keys in storage.
    */
 
-  keys(): string[];
+  keys(): Promise<string[]>;
   /**
    * Checks whether a value exists for the specified key.
    * @param key - The key to check for existence.
    * @returns `true` if the key exists, otherwise `false`.
    */
-  has(key: string): boolean;
+  has(key: string): Promise<boolean>;
+  /**
+   * Returns all values in storage.
+   * @returns An array of all stored values.
+   */
+  getAll?(): Promise<T[]>;
 }

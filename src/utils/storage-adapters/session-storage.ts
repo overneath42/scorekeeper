@@ -28,73 +28,75 @@ export class SessionStorageAdapter<T> implements StorageAdapter<T> {
     return this.prefix ? `${this.prefix}:${key}` : key;
   }
 
-  get(key: string): T | null {
+  async get(key: string): Promise<T | null> {
     try {
       const item = sessionStorage.getItem(this.getKey(key));
-      return item ? JSON.parse(item) : null;
+      return Promise.resolve(item ? JSON.parse(item) : null);
     } catch (error) {
       console.error(`Error reading from sessionStorage for key "${key}":`, error);
-      return null;
+      return Promise.resolve(null);
     }
   }
 
-  set(key: string, value: T): boolean {
+  async set(key: string, value: T): Promise<boolean> {
     try {
       sessionStorage.setItem(this.getKey(key), JSON.stringify(value));
-      return true;
+      return Promise.resolve(true);
     } catch (error) {
       console.error(`Error writing to sessionStorage for key "${key}":`, error);
-      return false;
+      return Promise.resolve(false);
     }
   }
 
-  remove(key: string): boolean {
+  async remove(key: string): Promise<boolean> {
     try {
       sessionStorage.removeItem(this.getKey(key));
-      return true;
+      return Promise.resolve(true);
     } catch (error) {
       console.error(`Error removing from sessionStorage for key "${key}":`, error);
-      return false;
+      return Promise.resolve(false);
     }
   }
 
-  clear(): boolean {
+  async clear(): Promise<boolean> {
     try {
       if (this.prefix) {
-        const keys = this.keys();
+        const keys = await this.keys();
         keys.forEach((key) => sessionStorage.removeItem(this.getKey(key)));
       } else {
         sessionStorage.clear();
       }
-      return true;
+      return Promise.resolve(true);
     } catch (error) {
       console.error("Error clearing sessionStorage:", error);
-      return false;
+      return Promise.resolve(false);
     }
   }
 
-  keys(): string[] {
+  async keys(): Promise<string[]> {
     try {
       const allKeys = Object.keys(sessionStorage);
       if (this.prefix) {
         const prefixPattern = `${this.prefix}:`;
-        return allKeys
-          .filter((key) => key.startsWith(prefixPattern))
-          .map((key) => key.substring(prefixPattern.length));
+        return Promise.resolve(
+          allKeys
+            .filter((key) => key.startsWith(prefixPattern))
+            .map((key) => key.substring(prefixPattern.length))
+        );
       }
-      return allKeys;
+      return Promise.resolve(allKeys);
     } catch (error) {
       console.error("Error getting sessionStorage keys:", error);
-      return [];
+      return Promise.resolve([]);
     }
   }
 
-  has(key: string): boolean {
+  async has(key: string): Promise<boolean> {
     try {
-      return sessionStorage.getItem(this.getKey(key)) !== null;
+      return Promise.resolve(sessionStorage.getItem(this.getKey(key)) !== null);
     } catch (error) {
       console.error(`Error checking sessionStorage for key "${key}":`, error);
-      return false;
+      return Promise.resolve(false);
     }
   }
 }

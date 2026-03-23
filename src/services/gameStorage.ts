@@ -1,4 +1,5 @@
 import { LocalStorageAdapter, StorageAdapter, type Game, type GamePlayer, type ScoreEntry } from "@/utils";
+import { normalizeDates } from "@/utils/normalizeDates.js";
 
 export interface StoredGame extends Game {
   id: string;
@@ -22,10 +23,12 @@ export class GameStorageService {
   private storage: StorageAdapter<StoredGame>;
   private static instance: GameStorageService;
 
-  private constructor() {
-    // TODO: eventually it would be great to make this user-configurable, so we can eventually
-    // expose it to other storage backends (IndexedDB, remote API, etc)
-    this.storage = new LocalStorageAdapter<StoredGame>("scorekeeper");
+  private constructor(storage?: StorageAdapter<StoredGame>) {
+    this.storage = storage ?? new LocalStorageAdapter<StoredGame>("scorekeeper");
+  }
+
+  static initialize(storage: StorageAdapter<StoredGame>): void {
+    GameStorageService.instance = new GameStorageService(storage);
   }
 
   static getInstance(): GameStorageService {
@@ -35,7 +38,7 @@ export class GameStorageService {
     return GameStorageService.instance;
   }
 
-  saveGame(storedGame: StoredGame): boolean {
+  async saveGame(storedGame: StoredGame): Promise<boolean> {
     const gameToSave = {
       ...storedGame,
       updatedAt: new Date(),
@@ -43,29 +46,30 @@ export class GameStorageService {
     return this.storage.set(storedGame.id, gameToSave);
   }
 
-  getStoredGame(gameId: string): StoredGame | null {
-    const game = this.storage.get(gameId);
+  async getStoredGame(gameId: string): Promise<StoredGame | null> {
+    const game = await this.storage.get(gameId);
     if (game) {
-      return {
-        ...game,
-        createdAt: new Date(game.createdAt),
-        updatedAt: new Date(game.updatedAt),
-        lastActiveAt: game.lastActiveAt ? new Date(game.lastActiveAt) : null,
-      };
+      return normalizeDates(game);
     }
     return null;
   }
 
-  getAllStoredGames(): StoredGame[] {
-    const gameIds = this.storage.keys();
-    return gameIds
-      .map((id) => this.getStoredGame(id))
-      .filter((game): game is StoredGame => game !== null)
-      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+  async getAllStoredGames(): Promise<StoredGame[]> {
+    let games: StoredGame[];
+    if (this.storage.getAll) {
+      const raw = await this.storage.getAll();
+      games = raw.map(normalizeDates);
+    } else {
+      const ids = await this.storage.keys();
+      games = (await Promise.all(ids.map(id => this.getStoredGame(id))))
+        .filter((g): g is StoredGame => g !== null);
+    }
+    return games.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   }
 
-  getGameSummaries(): GameSummary[] {
-    return this.getAllStoredGames().map((storedGame) => {
+  async getGameSummaries(): Promise<GameSummary[]> {
+    const games = await this.getAllStoredGames();
+    return games.map((storedGame) => {
       const currentScores = this.calculatePlayerScores(storedGame);
       return {
         id: storedGame.id,
@@ -79,18 +83,18 @@ export class GameStorageService {
     });
   }
 
-  deleteGame(gameId: string): boolean {
+  async deleteGame(gameId: string): Promise<boolean> {
     return this.storage.remove(gameId);
   }
 
-  createGame(
+  async createGame(
     name: string,
     playerNames: string[],
     targetScore: number | null = null,
     timeLimit: number | null = null,
     timerBehavior: 'no-winner' | 'highest-score' | null = null,
     turnTrackingEnabled: boolean = true
-  ): StoredGame {
+  ): Promise<StoredGame> {
     const now = new Date();
     const id = generateUUID();
     const timecode = `game_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -114,23 +118,21 @@ export class GameStorageService {
       createdAt: now,
       updatedAt: now,
       status: "active",
-      // Turn tracking initialization
       turnTrackingEnabled,
       currentPlayerIndex: turnTrackingEnabled ? 0 : undefined,
       currentTurnNumber: turnTrackingEnabled ? 1 : undefined,
     };
 
-    this.saveGame(storedGame);
+    await this.saveGame(storedGame);
     return storedGame;
   }
 
-  addScore(gameId: string, playerIndex: number, score: number): boolean {
-    const storedGame = this.getStoredGame(gameId);
+  async addScore(gameId: string, playerIndex: number, score: number): Promise<boolean> {
+    const storedGame = await this.getStoredGame(gameId);
     if (!storedGame) return false;
 
     if (playerIndex < 0 || playerIndex >= storedGame.players.length) return false;
 
-    // Turn validation: if turn tracking is enabled, only current player can score
     if (storedGame.turnTrackingEnabled && storedGame.currentPlayerIndex !== playerIndex) {
       console.warn(
         `Turn validation failed: expected player ${storedGame.currentPlayerIndex}, got ${playerIndex}`
@@ -141,12 +143,10 @@ export class GameStorageService {
     const scoreEntry: ScoreEntry = [playerIndex, score];
     storedGame.scoringHistory.push(scoreEntry);
 
-    // Turn advancement: if turn tracking is enabled, advance to next player
     if (storedGame.turnTrackingEnabled) {
       const nextPlayerIndex = (playerIndex + 1) % storedGame.players.length;
       storedGame.currentPlayerIndex = nextPlayerIndex;
 
-      // Increment turn number when wrapping back to first player
       if (nextPlayerIndex === 0) {
         storedGame.currentTurnNumber = (storedGame.currentTurnNumber ?? 1) + 1;
       }
@@ -155,32 +155,32 @@ export class GameStorageService {
     return this.saveGame(storedGame);
   }
 
-  updateGameStatus(gameId: string, status: StoredGame["status"]): boolean {
-    const storedGame = this.getStoredGame(gameId);
+  async updateGameStatus(gameId: string, status: StoredGame["status"]): Promise<boolean> {
+    const storedGame = await this.getStoredGame(gameId);
     if (!storedGame) return false;
 
     storedGame.status = status;
     return this.saveGame(storedGame);
   }
 
-  updateGame(gameId: string, gameData: Partial<Game>): boolean {
-    const storedGame = this.getStoredGame(gameId);
+  async updateGame(gameId: string, gameData: Partial<Game>): Promise<boolean> {
+    const storedGame = await this.getStoredGame(gameId);
     if (!storedGame) return false;
 
     Object.assign(storedGame, gameData);
     return this.saveGame(storedGame);
   }
 
-  updateTimeRemaining(gameId: string, timeRemaining: number): boolean {
-    const storedGame = this.getStoredGame(gameId);
+  async updateTimeRemaining(gameId: string, timeRemaining: number): Promise<boolean> {
+    const storedGame = await this.getStoredGame(gameId);
     if (!storedGame) return false;
 
     storedGame.timeRemaining = timeRemaining;
     return this.saveGame(storedGame);
   }
 
-  updateLastActiveAt(gameId: string, timestamp: Date): boolean {
-    const storedGame = this.getStoredGame(gameId);
+  async updateLastActiveAt(gameId: string, timestamp: Date): Promise<boolean> {
+    const storedGame = await this.getStoredGame(gameId);
     if (!storedGame) return false;
 
     storedGame.lastActiveAt = timestamp;
@@ -216,8 +216,8 @@ export class GameStorageService {
     };
   }
 
-  fromGameContext(game: Game, gameId?: string): StoredGame {
-    const existingGame = gameId ? this.getStoredGame(gameId) : null;
+  async fromGameContext(game: Game, gameId?: string): Promise<StoredGame> {
+    const existingGame = gameId ? await this.getStoredGame(gameId) : null;
     const now = new Date();
 
     return {
@@ -232,7 +232,7 @@ export class GameStorageService {
     };
   }
 
-  clearAllGames(): boolean {
+  async clearAllGames(): Promise<boolean> {
     return this.storage.clear();
   }
 }
