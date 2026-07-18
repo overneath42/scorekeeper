@@ -18,4 +18,12 @@
   .x-score .increment {
     @apply text-base italic;
   }
+
+  .x-score .increment-wrap {
+    @apply flex items-baseline gap-1;
+  }
+
+  .x-score .edit-indicator {
+    @apply text-sm text-primary not-italic;
+  }
 }

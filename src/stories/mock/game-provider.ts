@@ -27,7 +27,7 @@ export class MockGameProvider extends LitElement {
       timeRemaining: null,
       lastActiveAt: null,
       timerBehavior: null,
-      isTied: false,
+      isTied: () => false,
       players: [
         { index: 0, name: "Alice" },
         { index: 1, name: "Bob" },
@@ -45,6 +45,14 @@ export class MockGameProvider extends LitElement {
       ],
       createNewGame: async () => {},
       addScore: async () => {},
+      editLastScore: async () => {},
+      getLastScoreEntry: () => {
+        const history = mockGame.scoringHistory;
+        if (history.length === 0) return null;
+        const [playerIndex, score] = history[history.length - 1];
+        return { playerIndex, score };
+      },
+      completeGame: async () => {},
       updateGame: async () => {},
       getPlayerScoringHistory: (playerIndex: number): number[] => {
         return mockGame.scoringHistory

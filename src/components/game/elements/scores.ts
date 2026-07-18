@@ -20,12 +20,32 @@ export class GameScoresComponent extends BaseComponent {
     return this.game.getPlayerScoringHistory(this.playerIndex) ?? [];
   }
 
+  /**
+   * Whether this player's most recent entry is the last score entered in the
+   * whole game and can therefore be corrected. Only active games are editable.
+   */
+  private get canEditLastEntry(): boolean {
+    if (this.game?.status !== "active") return false;
+    const lastEntry = this.game?.getLastScoreEntry?.();
+    return !!lastEntry && lastEntry.playerIndex === this.playerIndex;
+  }
+
+  private handleEditLastScore(event: Event, currentValue: number) {
+    event.stopPropagation();
+    const popover = document.querySelector("x-score-popover") as
+      | (HTMLElement & { playerIndex: number; showEditPopover(el: HTMLElement, value: number): void })
+      | null;
+    if (popover) {
+      popover.playerIndex = this.playerIndex;
+      popover.showEditPopover(event.currentTarget as HTMLElement, currentValue);
+    }
+  }
+
   render() {
     let runningTotal = 0;
     const scores = this.scores;
     const lastIndex = scores.length - 1;
-
-    console.log("Rendering scores for player index", this.playerIndex, scores);
+    const canEditLastEntry = this.canEditLastEntry;
 
     return html`
       ${repeat(
@@ -34,13 +54,18 @@ export class GameScoresComponent extends BaseComponent {
         (score, index) => {
           runningTotal += score;
           const isCurrentScore = index === lastIndex;
+          const isEditable = canEditLastEntry && index === lastIndex;
 
           return html`
-            <div class="score-list-item">
+            <div
+              class="score-list-item ${isEditable ? "score-list-item--editable" : ""}"
+              title="${isEditable ? "Edit last score" : ""}"
+              @click="${isEditable ? (e: Event) => this.handleEditLastScore(e, score) : undefined}">
               <x-game-score
                 score="${runningTotal}"
                 increment="${score}"
-                ?is-current-score="${isCurrentScore}">
+                ?is-current-score="${isCurrentScore}"
+                ?editable="${isEditable}">
               </x-game-score>
             </div>
           `;

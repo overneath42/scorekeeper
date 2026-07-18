@@ -167,6 +167,31 @@ export class GameProviderComponent extends BaseComponent {
     }
   };
 
+  private getLastScoreEntry = (): { playerIndex: number; score: number } | null => {
+    const history = this.game?.scoringHistory;
+    if (!history || history.length === 0) return null;
+    const [playerIndex, score] = history[history.length - 1];
+    return { playerIndex, score };
+  };
+
+  private editLastScore = async (score: number) => {
+    if (!this.currentGameId) return;
+    await this.storage.updateLastScore(this.currentGameId, score);
+    const updatedGame = await this.storage.getStoredGame(this.currentGameId);
+    if (updatedGame) {
+      this.loadGame(updatedGame);
+    }
+  };
+
+  private completeGame = async () => {
+    if (!this.currentGameId) return;
+    await this.storage.updateGameStatus(this.currentGameId, "completed");
+    const updatedGame = await this.storage.getStoredGame(this.currentGameId);
+    if (updatedGame) {
+      this.loadGame(updatedGame);
+    }
+  };
+
   private getPlayerCurrentScore = (playerIndex: number): number => {
     const scores = this.storage.calculatePlayerScores(this.game);
     return scores[playerIndex] || 0;
@@ -189,10 +214,10 @@ export class GameProviderComponent extends BaseComponent {
     return this.getCurrentWinners().some((player) => player.index === playerIndex);
   };
 
-  private get gameIsTied(): boolean {
+  private gameIsTied = (): boolean => {
     const currentWinners = this.getCurrentWinners();
     return currentWinners.length > 1;
-  }
+  };
 
   private hasTurnTracking = (): boolean => {
     return this.game.turnTrackingEnabled === true;
@@ -222,6 +247,9 @@ export class GameProviderComponent extends BaseComponent {
       createNewGame: this.createNewGame,
       updateGame: this.updateGame,
       addScore: this.addScore,
+    editLastScore: this.editLastScore,
+    getLastScoreEntry: this.getLastScoreEntry,
+    completeGame: this.completeGame,
       getPlayerScoringHistory: this.getPlayerScoringHistory,
       getPlayerCurrentScore: this.getPlayerCurrentScore,
       isCurrentWinner: this.isCurrentWinner,
@@ -267,6 +295,9 @@ export class GameProviderComponent extends BaseComponent {
     createNewGame: this.createNewGame,
     updateGame: this.updateGame,
     addScore: this.addScore,
+    editLastScore: this.editLastScore,
+    getLastScoreEntry: this.getLastScoreEntry,
+    completeGame: this.completeGame,
     getPlayerScoringHistory: this.getPlayerScoringHistory,
     getPlayerCurrentScore: this.getPlayerCurrentScore,
     isCurrentWinner: this.isCurrentWinner,

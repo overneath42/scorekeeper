@@ -155,6 +155,26 @@ export class GameStorageService {
     return this.saveGame(storedGame);
   }
 
+  /**
+   * Replace the value of the most recently entered score. Scores are otherwise
+   * immutable; this exists only to correct a mistake in the last entry. The
+   * player and turn state are left untouched, and editing is refused once a
+   * game is no longer active.
+   */
+  async updateLastScore(gameId: string, score: number): Promise<boolean> {
+    const storedGame = await this.getStoredGame(gameId);
+    if (!storedGame) return false;
+    if (storedGame.status !== "active") return false;
+
+    const lastIndex = storedGame.scoringHistory.length - 1;
+    if (lastIndex < 0) return false;
+
+    const [playerIndex] = storedGame.scoringHistory[lastIndex];
+    storedGame.scoringHistory[lastIndex] = [playerIndex, score];
+
+    return this.saveGame(storedGame);
+  }
+
   async updateGameStatus(gameId: string, status: StoredGame["status"]): Promise<boolean> {
     const storedGame = await this.getStoredGame(gameId);
     if (!storedGame) return false;
