@@ -10,7 +10,7 @@ export interface GameContext extends StoredGame {
   getPlayerCurrentScore: (playerIndex: number) => number;
   isCurrentWinner: (playerIndex: number) => boolean;
   loadGameById: (gameId: string) => Promise<void>;
-  isTied: boolean;
+  isTied: () => boolean;
 
   // Turn tracking methods
   canPlayerScore: (playerIndex: number) => boolean;

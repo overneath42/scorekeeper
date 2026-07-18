@@ -27,7 +27,7 @@ export class MockGameProvider extends LitElement {
       timeRemaining: null,
       lastActiveAt: null,
       timerBehavior: null,
-      isTied: false,
+      isTied: () => false,
       players: [
         { index: 0, name: "Alice" },
         { index: 1, name: "Bob" },

@@ -28,8 +28,8 @@ export class CurrentScoreComponent extends BaseComponent {
 
   /** Compute the label given pre-computed state */
   private computeLabel(isWinner: boolean, isTied: boolean, isGameComplete: boolean): string {
-    if (isTied) return "Tied";
     if (!isWinner) return "";
+    if (isTied) return "Tied";
     return isGameComplete ? "Winner!" : "Leader";
   }
 
@@ -85,7 +85,7 @@ export class CurrentScoreComponent extends BaseComponent {
 
   render() {
     const isWinner = this.isCurrentWinner();
-    const isTied = this.game?.isTied ?? false;
+    const isTied = this.game?.isTied() ?? false;
     const isGameComplete = this.game?.status === "completed";
     const label = this.computeLabel(isWinner, isTied, isGameComplete);
     const currentScore = this.getCurrentScore();

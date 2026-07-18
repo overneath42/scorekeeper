@@ -189,10 +189,10 @@ export class GameProviderComponent extends BaseComponent {
     return this.getCurrentWinners().some((player) => player.index === playerIndex);
   };
 
-  private get gameIsTied(): boolean {
+  private gameIsTied = (): boolean => {
     const currentWinners = this.getCurrentWinners();
     return currentWinners.length > 1;
-  }
+  };
 
   private hasTurnTracking = (): boolean => {
     return this.game.turnTrackingEnabled === true;
