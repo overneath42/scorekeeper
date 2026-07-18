@@ -39,6 +39,14 @@
     @apply border-t border-dashed;
   }
 
+  .player-score-list .score-list-item--editable {
+    @apply cursor-pointer;
+  }
+
+  .player-score-list .score-list-item--editable:hover {
+    @apply bg-gray-100;
+  }
+
   .player-current-score {
     @apply px-sm pt-md;
     position: relative;

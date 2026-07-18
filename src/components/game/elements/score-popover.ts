@@ -22,6 +22,13 @@ export class ScorePopoverComponent extends BaseComponent {
   @property({ type: Boolean })
   open: boolean = false;
 
+  /**
+   * "add" appends a new score; "edit" replaces the value of the most recent
+   * score entry. Edit mode is only ever entered for that single last entry.
+   */
+  @state()
+  mode: "add" | "edit" = "add";
+
   /** Current value of the score input field (string while editing). */
   @state()
   inputValue: string = "";
@@ -54,19 +61,38 @@ export class ScorePopoverComponent extends BaseComponent {
       if (this.open) {
         const popoverElement = this.popoverRef.value as HTMLElement & { showPopover(): void };
         popoverElement?.showPopover();
-        // Focus input when popover opens
+        // Position once the popover has been laid out so its height is known.
+        requestAnimationFrame(() => this.positionPopover());
+        // Focus the input when the popover opens; select in edit mode so a
+        // correction can be typed straight over the existing value.
         setTimeout(() => {
-          this.inputRef.value?.focus();
+          const input = this.inputRef.value;
+          if (!input) return;
+          input.focus();
+          if (this.mode === "edit") input.select();
         }, 0);
       } else {
         const popoverElement = this.popoverRef.value as HTMLElement & { hidePopover(): void };
         popoverElement?.hidePopover();
         this.inputValue = "";
+        this.mode = "add";
       }
     }
   }
 
   showScorePopover(targetElement: HTMLElement) {
+    this.mode = "add";
+    this.targetElement = targetElement;
+    this.open = true;
+  }
+
+  /**
+   * Open the popover to edit the last entered score, pre-filled with its
+   * current value. Selects the text so a correction can be typed immediately.
+   */
+  showEditPopover(targetElement: HTMLElement, currentValue: number) {
+    this.mode = "edit";
+    this.inputValue = String(currentValue);
     this.targetElement = targetElement;
     this.open = true;
   }
@@ -102,7 +128,11 @@ export class ScorePopoverComponent extends BaseComponent {
       return;
     }
 
-    this.game?.addScore(this.playerIndex, score);
+    if (this.mode === "edit") {
+      this.game?.editLastScore(score);
+    } else {
+      this.game?.addScore(this.playerIndex, score);
+    }
     this.hideScorePopover();
   };
 
@@ -117,7 +147,12 @@ export class ScorePopoverComponent extends BaseComponent {
   };
 
   private get buttonText(): string {
+    if (this.mode === "edit") return "Save";
     return this.inputValue.trim() === "" ? "Skip" : "Score";
+  }
+
+  private get headingText(): string {
+    return this.mode === "edit" ? "Edit Last Score" : "Add Score";
   }
 
   private get playerName(): string {
@@ -129,7 +164,11 @@ export class ScorePopoverComponent extends BaseComponent {
       return html``;
     }
 
-    const popoverStyle = this.targetElement ? this.formatCSSProperties(this.getPopoverStyle()) : "";
+    // Keep the popover invisible until it has been measured and positioned
+    // (see positionPopover), so it never flashes in the wrong place.
+    const popoverStyle = this.cachedPosition
+      ? this.formatCSSProperties(this.cachedPosition)
+      : "visibility: hidden";
 
     return html`
       <div
@@ -139,7 +178,7 @@ export class ScorePopoverComponent extends BaseComponent {
         style="${popoverStyle}"
         @click=${(e: Event) => e.stopPropagation()}>
         <div class="mb-3">
-          <h3 class="font-semibold text-gray-800 mb-1">Add Score</h3>
+          <h3 class="font-semibold text-gray-800 mb-1">${this.headingText}</h3>
           <p class="text-sm text-gray-600">${this.playerName}</p>
         </div>
 
@@ -196,104 +235,48 @@ export class ScorePopoverComponent extends BaseComponent {
     `;
   }
 
-  private getPopoverStyle(): Partial<CSSStyleDeclaration> {
-    // Return cached position if available (prevents recalculation during re-renders)
-    if (this.cachedPosition) {
-      return this.cachedPosition;
-    }
+  /**
+   * Position the popover relative to the tapped element. Because we measure the
+   * popover's actual size, we can align it to the target's column and prefer
+   * placing it above the target, flipping below (or clamping to the viewport)
+   * when there isn't room above — which keeps it clear of the header.
+   */
+  private positionPopover() {
+    const popover = this.popoverRef.value;
+    if (!popover || !this.targetElement) return;
 
-    // Calculate position and cache it
-    if (!this.targetElement) return {};
-
-    const gridContainer = document.querySelector(".game-detail-grid") as HTMLElement;
-
-    let position: Partial<CSSStyleDeclaration>;
-    if (!gridContainer) {
-      // If the expected grid isn't present, fall back to a simpler positioning calculation.
-      position = this.getFallbackStyle();
-    } else {
-      position = this.getGridBasedStyle(gridContainer);
-    }
-
-    // Cache the calculated position
-    this.cachedPosition = position;
-    return position;
-  }
-
-  private getFallbackStyle(): Partial<CSSStyleDeclaration> {
-    if (!this.targetElement) return {};
-
+    const margin = 10;
+    const popRect = popover.getBoundingClientRect();
     const targetRect = this.targetElement.getBoundingClientRect();
-    const popoverWidth = 256; // min-w-64 = 16rem = 256px
     const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
 
-    const top = targetRect.top - 10;
-    const left = this.constrainHorizontalPosition(
-      targetRect.right - popoverWidth,
-      popoverWidth,
-      viewportWidth
-    );
+    // Horizontal: align the popover's right edge with the target's (its column),
+    // then clamp so it stays fully on screen.
+    let left = targetRect.right - popRect.width;
+    left = Math.max(margin, Math.min(left, viewportWidth - popRect.width - margin));
 
-    return {
-      position: "fixed",
-      top: `${top}px`,
-      left: `${left}px`,
-      transform: "translateY(-100%)",
-    };
-  }
+    // Vertical: prefer sitting just above the target. If that overflows the top,
+    // drop below it instead; if neither fits, clamp within the viewport.
+    let top = targetRect.top - margin - popRect.height;
+    if (top < margin) {
+      const below = targetRect.bottom + margin;
+      top =
+        below + popRect.height <= viewportHeight - margin
+          ? below
+          : viewportHeight - margin - popRect.height;
+    }
+    top = Math.max(margin, Math.min(top, viewportHeight - margin - popRect.height));
 
-  private getGridBasedStyle(gridContainer: HTMLElement): Partial<CSSStyleDeclaration> {
-    if (!this.targetElement) return {};
-
-    const containerRect = gridContainer.getBoundingClientRect();
-    const targetRect = this.targetElement.getBoundingClientRect();
-    const popoverWidth = 256; // min-w-64 = 16rem = 256px
-    const viewportWidth = window.innerWidth;
-
-    const top = targetRect.top - 10; // 10px gap above target
-    const columnRightEdge = this.getColumnRightEdge(gridContainer, containerRect);
-    const left = this.constrainHorizontalPosition(
-      columnRightEdge - popoverWidth,
-      popoverWidth,
-      viewportWidth
-    );
-
-    return {
+    this.cachedPosition = {
       position: "fixed",
       top: `${top}px`,
       left: `${left}px`,
       right: "auto",
       bottom: "auto",
-      transform: "translateY(-100%)",
+      transform: "none",
     };
-  }
-
-  private getColumnRightEdge(gridContainer: HTMLElement, containerRect: DOMRect): number {
-    // Determine the number of columns from the CSS custom property
-    const gridColumnsStyle =
-      getComputedStyle(gridContainer).getPropertyValue("--grid-columns") || "1";
-    const gridColumns = parseInt(gridColumnsStyle);
-    const columnWidth = containerRect.width / gridColumns;
-    // Right edge of the player's column (container left + columns * width)
-    return containerRect.left + (this.playerIndex + 1) * columnWidth;
-  }
-
-  private constrainHorizontalPosition(
-    left: number,
-    popoverWidth: number,
-    viewportWidth: number
-  ): number {
-    const margin = 10;
-
-    if (left < margin) {
-      return margin;
-    }
-
-    if (left + popoverWidth > viewportWidth - margin) {
-      return viewportWidth - popoverWidth - margin;
-    }
-
-    return left;
+    this.requestUpdate();
   }
 
   private formatCSSProperties(styles: Partial<CSSStyleDeclaration>): string {
