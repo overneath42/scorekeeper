@@ -5,6 +5,7 @@ import { StoredGame } from "@/services";
 export interface GameContext extends StoredGame {
   createNewGame: (name: string, targetScore: number, players: string[]) => Promise<void>;
   addScore: (playerIndex: number, score: number) => Promise<void>;
+  completeGame: () => Promise<void>;
   updateGame: (game: Game) => Promise<void>;
   getPlayerScoringHistory: (playerIndex: number) => number[];
   getPlayerCurrentScore: (playerIndex: number) => number;

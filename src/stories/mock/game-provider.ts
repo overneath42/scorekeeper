@@ -45,6 +45,7 @@ export class MockGameProvider extends LitElement {
       ],
       createNewGame: async () => {},
       addScore: async () => {},
+      completeGame: async () => {},
       updateGame: async () => {},
       getPlayerScoringHistory: (playerIndex: number): number[] => {
         return mockGame.scoringHistory

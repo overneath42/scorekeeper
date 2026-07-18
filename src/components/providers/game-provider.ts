@@ -167,6 +167,15 @@ export class GameProviderComponent extends BaseComponent {
     }
   };
 
+  private completeGame = async () => {
+    if (!this.currentGameId) return;
+    await this.storage.updateGameStatus(this.currentGameId, "completed");
+    const updatedGame = await this.storage.getStoredGame(this.currentGameId);
+    if (updatedGame) {
+      this.loadGame(updatedGame);
+    }
+  };
+
   private getPlayerCurrentScore = (playerIndex: number): number => {
     const scores = this.storage.calculatePlayerScores(this.game);
     return scores[playerIndex] || 0;
@@ -222,6 +231,7 @@ export class GameProviderComponent extends BaseComponent {
       createNewGame: this.createNewGame,
       updateGame: this.updateGame,
       addScore: this.addScore,
+    completeGame: this.completeGame,
       getPlayerScoringHistory: this.getPlayerScoringHistory,
       getPlayerCurrentScore: this.getPlayerCurrentScore,
       isCurrentWinner: this.isCurrentWinner,
@@ -267,6 +277,7 @@ export class GameProviderComponent extends BaseComponent {
     createNewGame: this.createNewGame,
     updateGame: this.updateGame,
     addScore: this.addScore,
+    completeGame: this.completeGame,
     getPlayerScoringHistory: this.getPlayerScoringHistory,
     getPlayerCurrentScore: this.getPlayerCurrentScore,
     isCurrentWinner: this.isCurrentWinner,

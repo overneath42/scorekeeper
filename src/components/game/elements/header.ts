@@ -1,8 +1,10 @@
 import { html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { createRef, ref, Ref } from "lit/directives/ref.js";
 import { consume } from "@lit/context";
 import { BaseComponent } from "@/utils/index.js";
 import { gameContext, type GameContext } from "@/context";
+import type { ModalComponent } from "@/components/modal/modal.js";
 import barba from "@barba/core";
 
 @customElement("x-game-header")
@@ -13,6 +15,8 @@ export class GameHeaderComponent extends BaseComponent {
 
   @property({ type: String, attribute: "back-url" })
   backUrl: string = "/";
+
+  private finishModalRef: Ref<ModalComponent> = createRef();
 
   get title() {
     return this.game?.name || "Untitled Game";
@@ -48,6 +52,15 @@ export class GameHeaderComponent extends BaseComponent {
     return `Started on ${dateString}`;
   }
 
+  /**
+   * Games with a target score complete automatically when the target is
+   * reached. Games without one need a manual way to be marked finished, so we
+   * only offer the button for an active, untargeted game.
+   */
+  get showFinishButton() {
+    return !!this.game && this.game.status === "active" && !this.game.targetScore;
+  }
+
   get headerColumnCount() {
     const hasTimeLimit = this.game?.timeLimit;
     const hasTurnTracking = this.game?.hasTurnTracking();
@@ -63,6 +76,36 @@ export class GameHeaderComponent extends BaseComponent {
       url.searchParams.set("id", this.game.id);
     }
     barba.go(url.toString());
+  }
+
+  handleFinishGame() {
+    if (!this.game) return;
+
+    this.finishModalRef.value?.open({
+      title: "Finish Game",
+      content: html`
+        <p class="mb-4">
+          Are you sure you want to mark this game as finished? Scoring will be disabled.
+        </p>
+        <div class="flex gap-2 justify-end">
+          <button
+            type="button"
+            @click=${() => this.finishModalRef.value?.close()}
+            class="btn-sm btn-secondary-outline">
+            Cancel
+          </button>
+          <button type="button" @click=${() => this.confirmFinishGame()} class="btn-sm btn-primary">
+            Finish Game
+          </button>
+        </div>
+      `,
+      size: "sm",
+    });
+  }
+
+  private confirmFinishGame() {
+    void this.game?.completeGame();
+    this.finishModalRef.value?.close();
   }
 
   render() {
@@ -96,9 +139,18 @@ export class GameHeaderComponent extends BaseComponent {
           <h1 class="text-center text-3xl font-semibold">${this.title}</h1>
           <div class="grid auto-cols-auto auto-rows-min gap-sm mx-auto w-full max-w-[475px]">
             ${this.startedOn
-              ? html`<p class="text-center row-start-1 col-span-${this.headerColumnCount}">
-                  ${this.startedOn}
-                </p>`
+              ? html`<div
+                  class="row-start-1 col-span-${this.headerColumnCount} flex items-center justify-center gap-md">
+                  <p class="text-center">${this.startedOn}</p>
+                  ${this.showFinishButton
+                    ? html`<button
+                        type="button"
+                        class="btn-sm btn-error whitespace-nowrap"
+                        @click="${this.handleFinishGame}">
+                        End Game
+                      </button>`
+                    : nothing}
+                </div>`
               : nothing}
             ${this.game?.timeLimit ? html`<x-game-timer></x-game-timer>` : nothing}
             ${hasTurnTracking && currentTurnNumber !== null
@@ -118,6 +170,7 @@ export class GameHeaderComponent extends BaseComponent {
           </div>
         </div>
       </header>
+      <x-modal ${ref(this.finishModalRef)}></x-modal>
     `;
   }
 }
