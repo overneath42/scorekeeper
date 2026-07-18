@@ -25,8 +25,6 @@ export class GameScoresComponent extends BaseComponent {
     const scores = this.scores;
     const lastIndex = scores.length - 1;
 
-    console.log("Rendering scores for player index", this.playerIndex, scores);
-
     return html`
       ${repeat(
         scores,

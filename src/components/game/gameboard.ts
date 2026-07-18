@@ -12,21 +12,15 @@ export class GameboardComponent extends BaseComponent {
   game?: GameContext;
 
   @property({ type: Number })
-  maxPlayersPerView = 3;
-
-  @property({ type: Number })
   wrapperHeight = 0;
 
   storage = GameStorageService.getInstance();
 
   private get variableStyles() {
-    const gridColumns = this.players.length;
-    const playerWidth = this.playerWidth;
-
-    return `
-    --grid-columns: ${gridColumns};
-    --player-width: ${playerWidth};
-    `;
+    // Column width and how many columns fit on screen are handled in CSS
+    // (see .game-detail-grid / --max-players-per-view), so JS only needs to
+    // report the total number of players.
+    return `--grid-columns: ${this.players.length};`;
   }
 
   private gameLoaded = false;
@@ -50,13 +44,6 @@ export class GameboardComponent extends BaseComponent {
 
   get players() {
     return this.game?.players || [];
-  }
-
-  get playerWidth() {
-    if (!this.players.length) return "100%";
-
-    const playerCount = Math.min(this.players.length, this.maxPlayersPerView);
-    return `${100 / playerCount}%`;
   }
 
   get hasGame() {
