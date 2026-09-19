@@ -19,7 +19,7 @@ This is a TypeScript-based scorekeeper application built with:
 - **Lit**: Web Components framework for UI components
 - **Vite**: Build tool and dev server
 - **Tailwind CSS**: Utility-first CSS framework
-- **Local Storage**: Game data persistence
+- **Local Storage**: Primary game data persistence, with optional Firestore sync (see Storage Service below)
 
 ### Core Architecture Patterns
 
@@ -33,14 +33,14 @@ This is a TypeScript-based scorekeeper application built with:
 - `x-game-provider`: Provides game state and game manipulation methods
 - `x-game-list-provider`: Provides list of games and game management
 
-**Storage Service**: `GameStorageService` singleton handles all persistence using localStorage with adapter pattern for potential future backend integration.
+**Storage Service**: `GameStorageService` singleton handles all game persistence using an adapter pattern. The default adapter is localStorage; when `VITE_FIREBASE_API_KEY` is set and a user signs in, a `SyncedStorageAdapter` layers Firestore sync on top (local storage stays primary/offline, Firestore syncs in the background). `TemplateStorageService` is a parallel singleton for reusable game templates, using the same adapter pattern under a separate `scorekeeper-templates` localStorage key.
 
 ### Key Components Structure
 
 - **Providers** (`src/components/providers/`): Context providers that manage state
 - **Game Components** (`src/components/game/`): Individual game view components
 - **Game Detail** (`src/components/game-detail/`): Game creation/editing forms
-- **Game List** (`src/components/game-list/`): Game listing and selection
+- **Game List** (`src/components/games-list.ts`): Game listing and selection. Note: despite the "Game Detail"/"Providers" folder convention, this one lives as a flat file rather than inside `src/components/game-list/`; that folder holds only `game.ts`, a single sub-component.
 
 ### Data Flow
 
@@ -57,6 +57,8 @@ The app uses Vite's multi-page build with separate HTML entry points:
 - `pages/edit.html`: Edit existing game
 - `pages/play.html`: Play game interface
 
+Navigation between these pages is animated with `@barba/core` (`src/barba-init.ts`, `src/transitions/`), which intercepts page loads and runs transition effects (slide up/down/left/right) instead of a hard navigation.
+
 ### File Organization
 
 - `src/context/`: Context definitions for state management
@@ -72,3 +74,4 @@ The app uses Vite's multi-page build with separate HTML entry points:
 - No Shadow DOM - components render directly to light DOM for Tailwind compatibility
 - Uses `.js` imports in TypeScript files (Vite handles the resolution)
 - Local storage adapter pattern allows for future storage backend changes
+- Single-file CLAUDE.md is intentional for now; revisit if it grows substantially or a second, genuinely separate feature area (e.g. a real backend/frontend split) appears.
