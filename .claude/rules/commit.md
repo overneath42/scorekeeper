@@ -1,0 +1,2 @@
+- When making a commit, never include any permutation of the phrase "co-authored by Claude".
+- Always evaluate the staged files and group them into logical commits. Each commit should represent a single logical change to the codebase.
