@@ -1,3 +1,7 @@
+export * from "./player.js";
+export * from "./player-association.js";
+export * from "./player-template.js";
+
 export type ScoreEntry = [number, number];
 
 export interface GameTemplate {

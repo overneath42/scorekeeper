@@ -26,10 +26,12 @@ This is a TypeScript-based scorekeeper application built with:
 **Component-Based Architecture**: Uses Lit web components with custom element registration. All components extend `BaseComponent` which disables Shadow DOM to work with global Tailwind styles.
 
 **Context Pattern**: Uses `@lit/context` for state management:
+
 - `GameContext`: Manages individual game state and operations
 - `GameListContext`: Manages list of all games
 
 **Provider Pattern**: Context providers supply data and methods to child components:
+
 - `x-game-provider`: Provides game state and game manipulation methods
 - `x-game-list-provider`: Provides list of games and game management
 
@@ -52,6 +54,7 @@ This is a TypeScript-based scorekeeper application built with:
 ### Multi-Page Structure
 
 The app uses Vite's multi-page build with separate HTML entry points:
+
 - `index.html`: Game list (home page)
 - `pages/new.html`: Create new game
 - `pages/edit.html`: Edit existing game
@@ -75,3 +78,5 @@ Navigation between these pages is animated with `@barba/core` (`src/barba-init.t
 - Uses `.js` imports in TypeScript files (Vite handles the resolution)
 - Local storage adapter pattern allows for future storage backend changes
 - Single-file CLAUDE.md is intentional for now; revisit if it grows substantially or a second, genuinely separate feature area (e.g. a real backend/frontend split) appears.
+- NEVER sign your messages when asked to write a commit message or pull request description.
+- The message should NEVER include any variant of the phrase "Created by Claude Code".
